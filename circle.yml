@@ -1,0 +1,19 @@
+dependencies:
+  pre:
+    - rm ~/.gitconfig
+    - make deps
+  override:
+    - make build
+  post:
+    - tar -czvf $CIRCLE_ARTIFACTS/sigil-linux.tgz -C build/Linux sigil
+    - tar -czvf $CIRCLE_ARTIFACTS/sigil-darwin.tgz -C build/Darwin sigil
+
+test:
+  override:
+    - /bin/true
+
+deployment:
+  release:
+    branch: release
+    commands:
+      - make release
