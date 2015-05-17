@@ -1,15 +1,13 @@
 dependencies:
   pre:
-    - rm ~/.gitconfig
-    - mkdir -p /home/ubuntu/.go_workspace/src/github.com/gliderlabs
-    - cd .. && mv sigil /home/ubuntu/.go_workspace/src/github.com/gliderlabs/sigil && ln -s /home/ubuntu/.go_workspace/src/github.com/gliderlabs/sigil sigil
+    - make circleci
     - make deps
   override:
     - make build
   post:
     - tar -czvf $CIRCLE_ARTIFACTS/sigil-linux.tgz -C build/Linux sigil
     - tar -czvf $CIRCLE_ARTIFACTS/sigil-darwin.tgz -C build/Darwin sigil
-    - tar -czvf $CIRCLE_ARTIFACTS/go-workspace.tgz.tgz -C ~/.go_workspace
+    - tar -czvf $CIRCLE_ARTIFACTS/go-workspace.tgz -C ~/.go_workspace
 
 test:
   override:
