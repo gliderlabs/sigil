@@ -22,10 +22,11 @@ release:
 
 circleci:
 	rm ~/.gitconfig
-	cd .. \
-		&& mkdir -p ~/.go_workspace/src/github.com/$(ORG) \
+	test -d /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) || { \
+		&& cd .. \
+		&& mkdir -p /home/ubuntu/.go_workspace/src/github.com/$(ORG) \
 		&& mv $(NAME) /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) \
-		&& ln -s /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) $(NAME)
+		&& ln -s /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) $(NAME); }
 
 clean:
 	rm -rf build release
