@@ -18,13 +18,12 @@ release:
 	rm -rf release && mkdir release
 	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(NAME)
 	tar -zcf release/$(NAME)_$(VERSION)_Darwin_$(ARCH).tgz -C build/Darwin $(NAME)
-	gh-release checksums sha256
 	gh-release create $(ORG)/$(NAME) $(VERSION) $(shell git rev-parse --abbrev-ref HEAD) v$(VERSION)
 
 circleci:
 	rm ~/.gitconfig
-	mkdir -p ~/.go_workspace/src/github.com/$(ORG)
 	cd .. \
+		&& mkdir -p ~/.go_workspace/src/github.com/$(ORG) \
 		&& mv $(NAME) /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) \
 		&& ln -s /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) $(NAME)
 

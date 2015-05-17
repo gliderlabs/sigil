@@ -7,7 +7,7 @@ dependencies:
   post:
     - tar -czvf $CIRCLE_ARTIFACTS/sigil-linux.tgz -C build/Linux sigil
     - tar -czvf $CIRCLE_ARTIFACTS/sigil-darwin.tgz -C build/Darwin sigil
-    - tar -czvf $CIRCLE_ARTIFACTS/go-workspace.tgz -C ~/.go_workspace
+    - tar -czvf $CIRCLE_ARTIFACTS/go-workspace.tgz -C ~/.go_workspace .
 
 test:
   override:
