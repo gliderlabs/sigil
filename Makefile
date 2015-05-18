@@ -1,7 +1,7 @@
 NAME=sigil
 ARCH=$(shell uname -m)
 ORG=gliderlabs
-VERSION=0.1.0
+VERSION=0.2.0
 
 build:
 	mkdir -p build/Linux  && GOOS=linux  go build -ldflags "-X main.Version $(VERSION)" -o build/Linux/$(NAME) ./cmd
@@ -22,10 +22,10 @@ release:
 
 circleci:
 	rm ~/.gitconfig
-	test -d /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) || { cd .. \
+	rm -rf /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) && cd .. \
 		&& mkdir -p /home/ubuntu/.go_workspace/src/github.com/$(ORG) \
 		&& mv $(NAME) /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) \
-		&& ln -s /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) $(NAME); }
+		&& ln -s /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) $(NAME)
 
 clean:
 	rm -rf build release

@@ -16,6 +16,7 @@ var Version string
 
 var (
 	filename = flag.String("f", "", "use template file instead of STDIN")
+	posix    = flag.Bool("p", true, "preprocess with POSIX variable expansion")
 	version  = flag.Bool("v", false, "prints version")
 )
 
@@ -41,8 +42,14 @@ func main() {
 		fmt.Println(Version)
 		os.Exit(0)
 	}
+	if *posix {
+		sigil.PosixPreprocess = true
+	}
 	vars := make(map[string]string)
 	for _, arg := range os.Args {
+		if strings.HasPrefix(arg, "-") {
+			continue
+		}
 		parts := strings.SplitN(arg, "=", 2)
 		if len(parts) == 2 {
 			vars[parts[0]] = parts[1]
