@@ -32,7 +32,11 @@ func Execute(input string, vars map[string]string) (string, error) {
 		escaped := strings.Replace(v, "\"", "\\\"", -1)
 		tmplVars = tmplVars + fmt.Sprintf("{{ $%s := \"%s\" }}", k, escaped)
 	}
-	tmpl, err := template.New("template").Funcs(fnMap).Parse(tmplVars + input)
+	preprocessed, err := posix.ExpandEnv(input)
+	if err != nil {
+		return "", err
+	}
+	tmpl, err := template.New("template").Funcs(fnMap).Parse(tmplVars + preprocessed)
 	if err != nil {
 		return "", err
 	}
@@ -41,9 +45,5 @@ func Execute(input string, vars map[string]string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	postprocessed, err := posix.ExpandEnv(buf.String())
-	if err != nil {
-		return "", err
-	}
-	return postprocessed, nil
+	return buf.String(), nil
 }
