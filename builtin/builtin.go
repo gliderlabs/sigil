@@ -21,6 +21,7 @@ func init() {
 		"seq":        Seq,
 		"default":    Default,
 		"join":       Join,
+		"split":      Split,
 		"capitalize": Capitalize,
 		"lower":      Lower,
 		"upper":      Upper,
@@ -31,6 +32,7 @@ func init() {
 		"yaml":       Yaml,
 		"pointer":    Pointer,
 		"include":    Include,
+		"indent":     Indent,
 	})
 }
 
@@ -66,6 +68,10 @@ func Default(value, in interface{}) interface{} {
 
 func Join(delim string, in []string) string {
 	return strings.Join(in, delim)
+}
+
+func Split(delim string, in string) []string {
+	return strings.Split(in, delim)
 }
 
 func Capitalize(in string) string {
@@ -145,4 +151,13 @@ func Include(filename string, args ...string) (string, error) {
 		return "", err
 	}
 	return str, nil
+}
+
+func Indent(indent, in string) string {
+	var indented []string
+	lines := strings.Split(in, "\n")
+	for _, line := range lines {
+		indented = append(indented, indent+line)
+	}
+	return strings.Join(indented, "\n")
 }
