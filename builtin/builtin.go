@@ -156,8 +156,11 @@ func Include(filename string, args ...string) (string, error) {
 func Indent(indent, in string) string {
 	var indented []string
 	lines := strings.Split(in, "\n")
-	for _, line := range lines {
-		indented = append(indented, indent+line)
+	indented = append(indented, lines[0])
+	if len(lines) > 1 {
+		for _, line := range lines[1:] {
+			indented = append(indented, indent+line)
+		}
 	}
 	return strings.Join(indented, "\n")
 }
