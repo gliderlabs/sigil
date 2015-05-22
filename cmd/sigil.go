@@ -45,6 +45,9 @@ func main() {
 	if *posix {
 		sigil.PosixPreprocess = true
 	}
+	if os.Getenv("SIGIL_PATH") != "" {
+		sigil.TemplatePath = strings.Split(os.Getenv("SIGIL_PATH"), ":")
+	}
 	vars := make(map[string]string)
 	for _, arg := range os.Args {
 		if strings.HasPrefix(arg, "-") {

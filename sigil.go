@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -11,6 +12,7 @@ import (
 )
 
 var (
+	TemplatePath    []string
 	TemplateDir     string
 	PosixPreprocess bool
 )
@@ -21,6 +23,18 @@ func Register(fm template.FuncMap) {
 	for k, v := range fm {
 		fnMap[k] = v
 	}
+}
+
+func LookPath(file string) (string, error) {
+	cwd, _ := os.Getwd()
+	search := append([]string{cwd, TemplateDir}, TemplatePath...)
+	for _, path := range search {
+		filepath := filepath.Join(path, file)
+		if _, err := os.Stat(filepath); err == nil {
+			return filepath, nil
+		}
+	}
+	return "", fmt.Errorf("Not found in path: %s", file)
 }
 
 func Execute(input string, vars map[string]string) (string, error) {

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
-	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -94,14 +92,12 @@ func Trim(in string) string {
 	return strings.Trim(in, " \n")
 }
 
-func file(filename string) []byte {
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		filename = filepath.Join(sigil.TemplateDir, filename)
-		if _, err := os.Stat(filename); os.IsNotExist(err) {
-			return []byte{}
-		}
+func file(file string) []byte {
+	filepath, err := sigil.LookPath(file)
+	if err != nil {
+		return []byte{}
 	}
-	data, err := ioutil.ReadFile(filename)
+	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return []byte{}
 	}
@@ -135,7 +131,11 @@ func Pointer(path string, in map[string]interface{}) interface{} {
 }
 
 func Include(filename string, args ...string) (string, error) {
-	data, err := ioutil.ReadFile(filename)
+	filepath, err := sigil.LookPath(filename)
+	if err != nil {
+		return "", err
+	}
+	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return "", err
 	}
