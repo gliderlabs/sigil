@@ -130,7 +130,7 @@ func Pointer(path string, in map[string]interface{}) interface{} {
 	return jsonpointer.Get(in, path)
 }
 
-func Include(filename string, args ...string) (string, error) {
+func Include(filename string, args ...interface{}) (string, error) {
 	filepath, err := sigil.LookPath(filename)
 	if err != nil {
 		return "", err
@@ -139,11 +139,20 @@ func Include(filename string, args ...string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	vars := make(map[string]string)
-	for _, arg := range args {
-		parts := strings.SplitN(arg, "=", 2)
-		if len(parts) == 2 {
-			vars[parts[0]] = parts[1]
+	var vars map[string]string
+	if len(args) == 1 {
+		v, ok := args[0].(map[string]string)
+		if ok {
+			vars = v
+		}
+	}
+	if vars == nil {
+		vars = make(map[string]string)
+		for _, arg := range args {
+			parts := strings.SplitN(arg.(string), "=", 2)
+			if len(parts) == 2 {
+				vars[parts[0]] = parts[1]
+			}
 		}
 	}
 	str, err := sigil.Execute(string(data), vars)

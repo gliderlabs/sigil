@@ -59,7 +59,7 @@ func Execute(input string, vars map[string]string) (string, error) {
 		return "", err
 	}
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, nil)
+	err = tmpl.Execute(&buf, vars)
 	if err != nil {
 		return "", err
 	}
