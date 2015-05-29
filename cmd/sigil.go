@@ -60,12 +60,12 @@ func main() {
 	}
 	tmpl, err := template()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	render, err := sigil.Execute(tmpl, vars)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	fmt.Print(render)
