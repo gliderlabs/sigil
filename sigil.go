@@ -13,7 +13,6 @@ import (
 
 var (
 	TemplatePath    []string
-	TemplateDir     string
 	PosixPreprocess bool
 )
 
@@ -25,9 +24,17 @@ func Register(fm template.FuncMap) {
 	}
 }
 
+func PushPath(path string) {
+	TemplatePath = append([]string{path}, TemplatePath...)
+}
+
+func PopPath() {
+	_, TemplatePath = TemplatePath[0], TemplatePath[1:]
+}
+
 func LookPath(file string) (string, error) {
 	cwd, _ := os.Getwd()
-	search := append([]string{cwd, TemplateDir}, TemplatePath...)
+	search := append([]string{cwd}, TemplatePath...)
 	for _, path := range search {
 		filepath := filepath.Join(path, file)
 		if _, err := os.Stat(filepath); err == nil {

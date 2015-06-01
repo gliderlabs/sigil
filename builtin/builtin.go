@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -131,11 +132,11 @@ func Pointer(path string, in map[string]interface{}) interface{} {
 }
 
 func Include(filename string, args ...interface{}) (string, error) {
-	filepath, err := sigil.LookPath(filename)
+	path, err := sigil.LookPath(filename)
 	if err != nil {
 		return "", err
 	}
-	data, err := ioutil.ReadFile(filepath)
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
@@ -155,6 +156,8 @@ func Include(filename string, args ...interface{}) (string, error) {
 			}
 		}
 	}
+	sigil.PushPath(filepath.Dir(path))
+	defer sigil.PopPath()
 	str, err := sigil.Execute(string(data), vars)
 	if err != nil {
 		return "", err

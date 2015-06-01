@@ -26,7 +26,7 @@ func template() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		sigil.TemplateDir = filepath.Dir(*filename)
+		sigil.PushPath(filepath.Dir(*filename))
 		return string(data), nil
 	}
 	data, err := ioutil.ReadAll(os.Stdin)
