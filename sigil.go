@@ -41,10 +41,10 @@ func LookPath(file string) (string, error) {
 			return filepath, nil
 		}
 	}
-	return "", fmt.Errorf("Not found in path: %s", file)
+	return "", fmt.Errorf("Not found in path: %s %v", file, TemplatePath)
 }
 
-func Execute(input string, vars map[string]string) (string, error) {
+func Execute(input string, vars map[string]string, name string) (string, error) {
 	var tmplVars string
 	var err error
 	for k, v := range vars {
@@ -61,7 +61,8 @@ func Execute(input string, vars map[string]string) (string, error) {
 			return "", err
 		}
 	}
-	tmpl, err := template.New("template").Funcs(fnMap).Parse(tmplVars + input)
+	input = strings.Replace(input, "}}\n{{", "}}{{", -1)
+	tmpl, err := template.New(name).Funcs(fnMap).Parse(tmplVars + input)
 	if err != nil {
 		return "", err
 	}

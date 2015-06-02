@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -32,6 +34,8 @@ func init() {
 		"pointer":    Pointer,
 		"include":    Include,
 		"indent":     Indent,
+		"env":        Env,
+		"match":      Match,
 	})
 }
 
@@ -93,38 +97,47 @@ func Trim(in string) string {
 	return strings.Trim(in, " \n")
 }
 
-func file(file string) []byte {
+func file(file string) ([]byte, error) {
 	filepath, err := sigil.LookPath(file)
 	if err != nil {
-		return []byte{}
+		return []byte{}, err
 	}
 	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		return []byte{}
+		return []byte{}, err
 	}
-	return data
+	return data, nil
 }
 
-func File(filename string) string {
-	return string(file(filename))
+func File(filename string) (string, error) {
+	str, err := file(filename)
+	return string(str), err
 }
 
-func Json(filename string) map[string]interface{} {
-	var obj map[string]interface{}
-	err := json.Unmarshal(file(filename), &obj)
+func Json(filename string) (interface{}, error) {
+	var obj interface{}
+	f, err := file(filename)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return obj
+	err = json.Unmarshal(f, &obj)
+	if err != nil {
+		return nil, err
+	}
+	return obj, nil
 }
 
-func Yaml(filename string) map[string]interface{} {
-	var obj map[string]interface{}
-	err := yaml.Unmarshal(file(filename), &obj)
+func Yaml(filename string) (interface{}, error) {
+	var obj interface{}
+	f, err := file(filename)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return obj
+	err = yaml.Unmarshal(f, &obj)
+	if err != nil {
+		return nil, err
+	}
+	return obj, nil
 }
 
 func Pointer(path string, in map[string]interface{}) interface{} {
@@ -158,7 +171,7 @@ func Include(filename string, args ...interface{}) (string, error) {
 	}
 	sigil.PushPath(filepath.Dir(path))
 	defer sigil.PopPath()
-	str, err := sigil.Execute(string(data), vars)
+	str, err := sigil.Execute(string(data), vars, filepath.Base(path))
 	if err != nil {
 		return "", err
 	}
@@ -175,4 +188,12 @@ func Indent(indent, in string) string {
 		}
 	}
 	return strings.Join(indented, "\n")
+}
+
+func Env(name string) string {
+	return os.Getenv(name)
+}
+
+func Match(pattern string, str string) (bool, error) {
+	return path.Match(pattern, str)
 }
