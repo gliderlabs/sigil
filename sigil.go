@@ -44,9 +44,18 @@ func LookPath(file string) (string, error) {
 	return "", fmt.Errorf("Not found in path: %s %v", file, TemplatePath)
 }
 
+func restoreEnv(env []string) {
+	os.Clearenv()
+	for _, kvp := range env {
+		kv := strings.SplitN(kvp, "=", 2)
+		os.Setenv(kv[0], kv[1])
+	}
+}
+
 func Execute(input string, vars map[string]string, name string) (string, error) {
 	var tmplVars string
 	var err error
+	defer restoreEnv(os.Environ())
 	for k, v := range vars {
 		err := os.Setenv(k, v)
 		if err != nil {
@@ -61,7 +70,7 @@ func Execute(input string, vars map[string]string, name string) (string, error) 
 			return "", err
 		}
 	}
-	input = strings.Replace(input, "}}\n{{", "}}{{", -1)
+	input = strings.Replace(input, "\\}}\n{{", "}}{{", -1)
 	tmpl, err := template.New(name).Funcs(fnMap).Parse(tmplVars + input)
 	if err != nil {
 		return "", err

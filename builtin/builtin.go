@@ -34,7 +34,7 @@ func init() {
 		"pointer":    Pointer,
 		"include":    Include,
 		"indent":     Indent,
-		"env":        Env,
+		"var":        Var,
 		"match":      Match,
 	})
 }
@@ -190,7 +190,7 @@ func Indent(indent, in string) string {
 	return strings.Join(indented, "\n")
 }
 
-func Env(name string) string {
+func Var(name string) string {
 	return os.Getenv(name)
 }
 
