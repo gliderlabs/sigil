@@ -20,20 +20,20 @@ var (
 	version  = flag.Bool("v", false, "prints version")
 )
 
-func template() (string, string, error) {
+func template() ([]byte, string, error) {
 	if *filename != "" {
 		data, err := ioutil.ReadFile(*filename)
 		if err != nil {
-			return "", "", err
+			return []byte{}, "", err
 		}
 		sigil.PushPath(filepath.Dir(*filename))
-		return string(data), filepath.Base(*filename), nil
+		return data, filepath.Base(*filename), nil
 	}
 	data, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		return "", "", err
+		return []byte{}, "", err
 	}
-	return string(data), "<stdin>", nil
+	return data, "<stdin>", nil
 }
 
 func main() {
@@ -68,5 +68,5 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Print(render)
+	os.Stdout.Write(render.Bytes())
 }

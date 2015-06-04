@@ -1,6 +1,7 @@
 package builtin
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -36,6 +37,7 @@ func init() {
 		"indent":     Indent,
 		"var":        Var,
 		"match":      Match,
+		"render":     Render,
 	})
 }
 
@@ -140,8 +142,47 @@ func Yaml(filename string) (interface{}, error) {
 	return obj, nil
 }
 
-func Pointer(path string, in map[string]interface{}) interface{} {
-	return jsonpointer.Get(in, path)
+func Pointer(path string, in map[interface{}]interface{}) interface{} {
+	m := make(map[string]interface{})
+	for k, v := range in {
+		m[k.(string)] = v
+	}
+	return jsonpointer.Get(m, path)
+}
+
+func Render(args ...interface{}) (string, error) {
+	if len(args) == 0 {
+		fmt.Errorf("render cannot be used without arguments")
+	}
+	input := args[len(args)-1].(string)
+	var vars []interface{}
+	if len(args) > 1 {
+		vars = args[0 : len(args)-1]
+	}
+	render, err := render([]byte(input), vars, "<render>")
+	return render.String(), err
+}
+
+func render(data []byte, args []interface{}, name string) (bytes.Buffer, error) {
+	vars := make(map[string]string)
+	for _, arg := range args {
+		mv, ok := arg.(map[string]string)
+		if ok {
+			for k, v := range mv {
+				vars[k] = v
+			}
+			continue
+		}
+		sv, ok := arg.(string)
+		if !ok {
+			continue
+		}
+		parts := strings.SplitN(sv, "=", 2)
+		if len(parts) == 2 {
+			vars[parts[0]] = parts[1]
+		}
+	}
+	return sigil.Execute(data, vars, name)
 }
 
 func Include(filename string, args ...interface{}) (string, error) {
@@ -153,29 +194,10 @@ func Include(filename string, args ...interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var vars map[string]string
-	if len(args) == 1 {
-		v, ok := args[0].(map[string]string)
-		if ok {
-			vars = v
-		}
-	}
-	if vars == nil {
-		vars = make(map[string]string)
-		for _, arg := range args {
-			parts := strings.SplitN(arg.(string), "=", 2)
-			if len(parts) == 2 {
-				vars[parts[0]] = parts[1]
-			}
-		}
-	}
 	sigil.PushPath(filepath.Dir(path))
 	defer sigil.PopPath()
-	str, err := sigil.Execute(string(data), vars, filepath.Base(path))
-	if err != nil {
-		return "", err
-	}
-	return str, nil
+	render, err := render(data, args, filepath.Base(path))
+	return render.String(), err
 }
 
 func Indent(indent, in string) string {
