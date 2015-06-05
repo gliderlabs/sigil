@@ -16,6 +16,7 @@ var Version string
 
 var (
 	filename = flag.String("f", "", "use template file instead of STDIN")
+	inline   = flag.String("i", "", "use inline template string instead of STDIN")
 	posix    = flag.Bool("p", false, "preprocess with POSIX variable expansion")
 	version  = flag.Bool("v", false, "prints version")
 )
@@ -28,6 +29,9 @@ func template() ([]byte, string, error) {
 		}
 		sigil.PushPath(filepath.Dir(*filename))
 		return data, filepath.Base(*filename), nil
+	}
+	if *inline != "" {
+		return []byte(*inline), "<inline>", nil
 	}
 	data, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {

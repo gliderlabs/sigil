@@ -38,6 +38,9 @@ func init() {
 		"var":        Var,
 		"match":      Match,
 		"render":     Render,
+		"exists":     Exists,
+		"dir":        Dir,
+		"stdin":      Stdin,
 	})
 }
 
@@ -65,6 +68,9 @@ func Seq(i interface{}) ([]string, error) {
 }
 
 func Default(value, in interface{}) interface{} {
+	if in == nil {
+		return value
+	}
 	if reflect.Zero(reflect.TypeOf(in)).Interface() == in {
 		return value
 	}
@@ -99,8 +105,16 @@ func Trim(in string) string {
 	return strings.Trim(in, " \n")
 }
 
-func file(file string) ([]byte, error) {
-	filepath, err := sigil.LookPath(file)
+func read(file interface{}) ([]byte, error) {
+	stdin, ok := file.(stdinStr)
+	if ok {
+		return []byte(stdin), nil
+	}
+	path, ok := file.(string)
+	if !ok {
+		return []byte{}, fmt.Errorf("file must be path string or stdin")
+	}
+	filepath, err := sigil.LookPath(path)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -112,13 +126,13 @@ func file(file string) ([]byte, error) {
 }
 
 func File(filename string) (string, error) {
-	str, err := file(filename)
+	str, err := read(filename)
 	return string(str), err
 }
 
-func Json(filename string) (interface{}, error) {
+func Json(file interface{}) (interface{}, error) {
 	var obj interface{}
-	f, err := file(filename)
+	f, err := read(file)
 	if err != nil {
 		return nil, err
 	}
@@ -129,9 +143,9 @@ func Json(filename string) (interface{}, error) {
 	return obj, nil
 }
 
-func Yaml(filename string) (interface{}, error) {
+func Yaml(file interface{}) (interface{}, error) {
 	var obj interface{}
-	f, err := file(filename)
+	f, err := read(file)
 	if err != nil {
 		return nil, err
 	}
@@ -142,12 +156,21 @@ func Yaml(filename string) (interface{}, error) {
 	return obj, nil
 }
 
-func Pointer(path string, in map[interface{}]interface{}) interface{} {
+func Pointer(path string, in interface{}) (interface{}, error) {
 	m := make(map[string]interface{})
-	for k, v := range in {
-		m[k.(string)] = v
+	switch val := in.(type) {
+	case map[string]interface{}:
+		for k, v := range val {
+			m[k] = v
+		}
+	case map[interface{}]interface{}:
+		for k, v := range val {
+			m[k.(string)] = v
+		}
+	default:
+		return nil, fmt.Errorf("pointer needs a map type")
 	}
-	return jsonpointer.Get(m, path)
+	return jsonpointer.Get(m, path), nil
 }
 
 func Render(args ...interface{}) (string, error) {
@@ -206,7 +229,11 @@ func Indent(indent, in string) string {
 	indented = append(indented, lines[0])
 	if len(lines) > 1 {
 		for _, line := range lines[1:] {
-			indented = append(indented, indent+line)
+			if line != "" {
+				indented = append(indented, indent+line)
+			} else {
+				indented = append(indented, line)
+			}
 		}
 	}
 	return strings.Join(indented, "\n")
@@ -218,4 +245,34 @@ func Var(name string) string {
 
 func Match(pattern string, str string) (bool, error) {
 	return path.Match(pattern, str)
+}
+
+func Exists(filename string) bool {
+	_, err := sigil.LookPath(filename)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func Dir(path string) ([]string, error) {
+	var files []string
+	dir, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+	for _, fi := range dir {
+		files = append(files, fi.Name())
+	}
+	return files, nil
+}
+
+type stdinStr string
+
+func Stdin() (stdinStr, error) {
+	data, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		return "", err
+	}
+	return stdinStr(data), nil
 }
