@@ -95,3 +95,4 @@ documentation there.
 ## License
 
 BSD
+<img src="https://ga-beacon.appspot.com/UA-58928488-2/sigil/readme?pixel" />
