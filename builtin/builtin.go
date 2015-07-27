@@ -77,8 +77,15 @@ func Default(value, in interface{}) interface{} {
 	return in
 }
 
-func Join(delim string, in []string) string {
-	return strings.Join(in, delim)
+func Join(delim string, in []interface{}) string {
+	var elements []string
+	for _, el := range in {
+		str, ok := el.(string)
+		if ok {
+			elements = append(elements, str)
+		}
+	}
+	return strings.Join(elements, delim)
 }
 
 func Split(delim string, in string) []string {
