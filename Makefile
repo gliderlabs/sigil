@@ -4,8 +4,14 @@ ORG=gliderlabs
 VERSION=0.3.1
 
 build:
-	mkdir -p build/Linux  && GOOS=linux  go build -ldflags "-X main.Version $(VERSION)" -o build/Linux/$(NAME) ./cmd
-	mkdir -p build/Darwin && GOOS=darwin go build -ldflags "-X main.Version $(VERSION)" -o build/Darwin/$(NAME) ./cmd
+	mkdir -p build/Linux  && GOOS=linux CGO_ENABLED=0 go build -a \
+		-installsuffix cgo \
+		-ldflags "-X main.Version $(VERSION)" \
+		-o build/Linux/$(NAME) ./cmd
+	mkdir -p build/Darwin && GOOS=darwin CGO_ENABLED=0 go build -a \
+		-installsuffix cgo \
+		-ldflags "-X main.Version $(VERSION)" \
+		-o build/Darwin/$(NAME) ./cmd
 
 install: build
 	install build/$(shell uname -s)/sigil /usr/local/bin
