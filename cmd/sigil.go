@@ -16,24 +16,28 @@ var Version string
 
 var (
 	filename = flag.String("f", "", "use template file instead of STDIN")
-	posix    = flag.Bool("p", true, "preprocess with POSIX variable expansion")
+	inline   = flag.String("i", "", "use inline template string instead of STDIN")
+	posix    = flag.Bool("p", false, "preprocess with POSIX variable expansion")
 	version  = flag.Bool("v", false, "prints version")
 )
 
-func template() (string, error) {
+func template() ([]byte, string, error) {
 	if *filename != "" {
 		data, err := ioutil.ReadFile(*filename)
 		if err != nil {
-			return "", err
+			return []byte{}, "", err
 		}
-		sigil.TemplateDir = filepath.Dir(*filename)
-		return string(data), nil
+		sigil.PushPath(filepath.Dir(*filename))
+		return data, filepath.Base(*filename), nil
+	}
+	if *inline != "" {
+		return []byte(*inline), "<inline>", nil
 	}
 	data, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		return "", err
+		return []byte{}, "", err
 	}
-	return string(data), nil
+	return data, "<stdin>", nil
 }
 
 func main() {
@@ -45,6 +49,9 @@ func main() {
 	if *posix {
 		sigil.PosixPreprocess = true
 	}
+	if os.Getenv("SIGIL_PATH") != "" {
+		sigil.TemplatePath = strings.Split(os.Getenv("SIGIL_PATH"), ":")
+	}
 	vars := make(map[string]string)
 	for _, arg := range os.Args {
 		if strings.HasPrefix(arg, "-") {
@@ -55,15 +62,15 @@ func main() {
 			vars[parts[0]] = parts[1]
 		}
 	}
-	tmpl, err := template()
+	tmpl, name, err := template()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	render, err := sigil.Execute(tmpl, vars)
+	render, err := sigil.Execute(tmpl, vars, name)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Print(render)
+	os.Stdout.Write(render.Bytes())
 }

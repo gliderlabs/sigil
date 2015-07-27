@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	TemplateDir     string
+	TemplatePath    []string
 	PosixPreprocess bool
 )
 
@@ -23,31 +24,65 @@ func Register(fm template.FuncMap) {
 	}
 }
 
-func Execute(input string, vars map[string]string) (string, error) {
+func PushPath(path string) {
+	TemplatePath = append([]string{path}, TemplatePath...)
+}
+
+func PopPath() {
+	_, TemplatePath = TemplatePath[0], TemplatePath[1:]
+}
+
+func LookPath(file string) (string, error) {
+	if strings.HasPrefix(file, "/") {
+		return file, nil
+	}
+	cwd, _ := os.Getwd()
+	search := append([]string{cwd}, TemplatePath...)
+	for _, path := range search {
+		filepath := filepath.Join(path, file)
+		if _, err := os.Stat(filepath); err == nil {
+			return filepath, nil
+		}
+	}
+	return "", fmt.Errorf("Not found in path: %s %v", file, TemplatePath)
+}
+
+func restoreEnv(env []string) {
+	os.Clearenv()
+	for _, kvp := range env {
+		kv := strings.SplitN(kvp, "=", 2)
+		os.Setenv(kv[0], kv[1])
+	}
+}
+
+func Execute(input []byte, vars map[string]string, name string) (bytes.Buffer, error) {
 	var tmplVars string
 	var err error
+	defer restoreEnv(os.Environ())
 	for k, v := range vars {
 		err := os.Setenv(k, v)
 		if err != nil {
-			return "", err
+			return bytes.Buffer{}, err
 		}
 		escaped := strings.Replace(v, "\"", "\\\"", -1)
 		tmplVars = tmplVars + fmt.Sprintf("{{ $%s := \"%s\" }}", k, escaped)
 	}
+	inputStr := string(input)
 	if PosixPreprocess {
-		input, err = posix.ExpandEnv(input)
+		inputStr, err = posix.ExpandEnv(inputStr)
 		if err != nil {
-			return "", err
+			return bytes.Buffer{}, err
 		}
 	}
-	tmpl, err := template.New("template").Funcs(fnMap).Parse(tmplVars + input)
+	inputStr = strings.Replace(inputStr, "\\}}\n{{", "}}{{", -1)
+	tmpl, err := template.New(name).Funcs(fnMap).Parse(tmplVars + inputStr)
 	if err != nil {
-		return "", err
+		return bytes.Buffer{}, err
 	}
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, nil)
+	err = tmpl.Execute(&buf, vars)
 	if err != nil {
-		return "", err
+		return bytes.Buffer{}, err
 	}
-	return buf.String(), nil
+	return buf, nil
 }
