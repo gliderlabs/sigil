@@ -18,7 +18,7 @@ install: build
 
 deps:
 	go get -u github.com/progrium/gh-release/...
-	go get ./cmd || true
+	go get -u ./cmd || true
 
 release:
 	rm -rf release && mkdir release
