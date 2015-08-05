@@ -40,6 +40,11 @@ func init() {
 		"render":     Render,
 		"exists":     Exists,
 		"dir":        Dir,
+		"dirs":       Dirs,
+		"files":      Files,
+		"uniq":       Uniq,
+		"drop":       Drop,
+		"append":     Append,
 		"stdin":      Stdin,
 	})
 }
@@ -262,8 +267,8 @@ func Exists(filename string) bool {
 	return true
 }
 
-func Dir(path string) ([]string, error) {
-	var files []string
+func Dir(path string) ([]interface{}, error) {
+	var files []interface{}
 	dir, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -274,6 +279,48 @@ func Dir(path string) ([]string, error) {
 	return files, nil
 }
 
+func Dirs(path string) ([]interface{}, error) {
+	var dirs []interface{}
+	dir, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+	for _, fi := range dir {
+		if fi.IsDir() {
+			dirs = append(dirs, fi.Name())
+		}
+	}
+	return dirs, nil
+}
+
+func Files(path string) ([]interface{}, error) {
+	var files []interface{}
+	dir, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+	for _, fi := range dir {
+		if !fi.IsDir() {
+			files = append(files, fi.Name())
+		}
+	}
+	return files, nil
+}
+
+func Uniq(in ...[]interface{}) []interface{} {
+	m := make(map[interface{}]bool)
+	for i := range in {
+		for _, v := range in[i] {
+			m[v] = true
+		}
+	}
+	var uniq []interface{}
+	for k, _ := range m {
+		uniq = append(uniq, k)
+	}
+	return uniq
+}
+
 type stdinStr string
 
 func Stdin() (stdinStr, error) {
@@ -282,4 +329,35 @@ func Stdin() (stdinStr, error) {
 		return "", err
 	}
 	return stdinStr(data), nil
+}
+
+func Append(item interface{}, items []interface{}) []interface{} {
+	return append(items, item)
+}
+
+func Drop(item interface{}, items []interface{}) ([]interface{}, error) {
+	var out []interface{}
+	pattern, isstr := item.(string)
+	if isstr {
+		for i := range items {
+			str, ok := items[i].(string)
+			if !ok {
+				return nil, fmt.Errorf("all elements must be a string to drop a string")
+			}
+			match, err := path.Match(pattern, str)
+			if err != nil {
+				return nil, fmt.Errorf("bad pattern: %s", pattern)
+			}
+			if !match {
+				out = append(out, items[i])
+			}
+		}
+		return out, nil
+	}
+	for i := range items {
+		if item != items[i] {
+			out = append(out, items[i])
+		}
+	}
+	return out, nil
 }

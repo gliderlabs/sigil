@@ -1,7 +1,7 @@
 NAME=sigil
 ARCH=$(shell uname -m)
 ORG=gliderlabs
-VERSION=0.3.1
+VERSION=0.3.2
 
 build:
 	mkdir -p build/Linux  && GOOS=linux CGO_ENABLED=0 go build -a \
