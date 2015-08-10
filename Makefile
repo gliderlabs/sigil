@@ -13,12 +13,16 @@ build:
 		-ldflags "-X main.Version $(VERSION)" \
 		-o build/Darwin/$(NAME) ./cmd
 
+test: build
+	basht tests/*.bash
+
 install: build
 	install build/$(shell uname -s)/sigil /usr/local/bin
 
 deps:
 	go get -u github.com/progrium/gh-release/...
 	go get -u ./cmd || true
+	go get -u github.com/progrium/basht/...
 
 release:
 	rm -rf release && mkdir release
