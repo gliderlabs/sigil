@@ -7,7 +7,7 @@
 Standalone string interpolator and template processor
 
 ```
-$ echo '${name} is{{ range seq ${count:-3} }} cool{{ end }}!' | sigil name=Sigil
+$ echo '${name} is{{ range seq ${count:-3} }} cool{{ end }}!' | sigil -p name=Sigil
 Sigil is cool cool cool!
 ```
 
@@ -30,8 +30,8 @@ Template text can be provided via STDIN or from a file if provided with the `-f`
 flag. Any other arguments are key-values in the form `<key>=<value>`. They are
 used as variables.
 
- * `echo 'Hello, $name' | sigil name=Jeff`
- * `sigil -f config.tmpl var1=foo "var2=Hello world"`
+ * `echo 'Hello, $name' | sigil -p name=Jeff`
+ * `sigil -p -f config.tmpl var1=foo "var2=Hello world"`
 
 ### Variables
 
