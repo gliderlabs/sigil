@@ -53,10 +53,7 @@ func main() {
 		sigil.TemplatePath = strings.Split(os.Getenv("SIGIL_PATH"), ":")
 	}
 	vars := make(map[string]string)
-	for _, arg := range os.Args {
-		if strings.HasPrefix(arg, "-") {
-			continue
-		}
+	for _, arg := range flag.Args() {
 		parts := strings.SplitN(arg, "=", 2)
 		if len(parts) == 2 {
 			vars[parts[0]] = parts[1]
