@@ -4,14 +4,7 @@ ORG=gliderlabs
 VERSION=0.3.2
 
 build:
-	mkdir -p build/Linux  && GOOS=linux CGO_ENABLED=0 go build -a \
-		-installsuffix cgo \
-		-ldflags "-X main.Version $(VERSION)" \
-		-o build/Linux/$(NAME) ./cmd
-	mkdir -p build/Darwin && GOOS=darwin CGO_ENABLED=0 go build -a \
-		-installsuffix cgo \
-		-ldflags "-X main.Version $(VERSION)" \
-		-o build/Darwin/$(NAME) ./cmd
+	glu build darwin,linux ./cmd
 
 test: build
 	basht tests/*.bash
@@ -20,22 +13,12 @@ install: build
 	install build/$(shell uname -s)/sigil /usr/local/bin
 
 deps:
-	go get -u github.com/progrium/gh-release/...
-	go get -u ./cmd || true
+	go get github.com/gliderlabs/glu
 	go get -u github.com/progrium/basht/...
+	go get ./cmd || true
 
 release:
-	rm -rf release && mkdir release
-	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(NAME)
-	tar -zcf release/$(NAME)_$(VERSION)_Darwin_$(ARCH).tgz -C build/Darwin $(NAME)
-	gh-release create $(ORG)/$(NAME) $(VERSION) $(shell git rev-parse --abbrev-ref HEAD) v$(VERSION)
-
-circleci:
-	rm ~/.gitconfig
-	rm -rf /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) && cd .. \
-		&& mkdir -p /home/ubuntu/.go_workspace/src/github.com/$(ORG) \
-		&& mv $(NAME) /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) \
-		&& ln -s /home/ubuntu/.go_workspace/src/github.com/$(ORG)/$(NAME) $(NAME)
+	glu release v$(VERSION)
 
 clean:
 	rm -rf build release
