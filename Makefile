@@ -1,12 +1,12 @@
 NAME=sigil
 ARCH=$(shell uname -m)
 ORG=gliderlabs
-VERSION=0.3.2
+VERSION=0.3.3
 
 build:
 	glu build darwin,linux ./cmd
 
-test: build
+test:
 	basht tests/*.bash
 
 install: build
@@ -15,7 +15,7 @@ install: build
 deps:
 	go get github.com/gliderlabs/glu
 	go get -u github.com/progrium/basht/...
-	go get ./cmd || true
+	go get -d ./cmd
 
 release:
 	glu release v$(VERSION)
