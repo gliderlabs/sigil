@@ -5,6 +5,7 @@ machine:
 dependencies:
   pre:
     - docker run --rm gliderlabs/glu | tar xC /home/ubuntu/bin
+    - glu version
     - glu container up
   override:
     - glu build linux,darwin ./cmd
