@@ -46,6 +46,7 @@ func init() {
 		"drop":       Drop,
 		"append":     Append,
 		"stdin":      Stdin,
+		"entries":    Entries,
 	})
 }
 
@@ -360,4 +361,12 @@ func Drop(item interface{}, items []interface{}) ([]interface{}, error) {
 		}
 	}
 	return out, nil
+}
+
+func Entries(pattern string, m map[interface{}]interface{}) []interface{} {
+	ret := []interface{}{}
+	for k, v := range m {
+		ret = append(ret, fmt.Sprintf(pattern, k, v))
+	}
+	return ret
 }
