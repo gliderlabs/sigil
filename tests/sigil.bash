@@ -1,6 +1,12 @@
 GOOS=$(go env GOOS)
 export SIGIL="${SIGIL:-build/${GOOS^}/sigil}"
 
+T_entries_with_join() {
+    result=$(echo '{{ $y := yaml "tests/test.yml"}}{{ $y.images | entries "%v=%v" | join ","  }}' | $SIGIL)
+    echo "HACK=$result"
+    [[ "$result" == "us-east-1=ami-11111111,us-west-1=ami-22222222" ]]
+}
+
 T_posix_var() {
   result=$(echo 'Hello, $name' | $SIGIL -p name=Jeff)
   [[ "$result" == "Hello, Jeff" ]]
