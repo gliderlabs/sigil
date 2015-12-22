@@ -4,6 +4,7 @@ machine:
 
 dependencies:
   pre:
+	- make deps
     - docker run --rm gliderlabs/glu | tar xC /home/ubuntu/bin
     - glu circleci
     - glu container up
