@@ -70,3 +70,14 @@ T_splitkv_joinkv() {
   result=$(echo 'one:two,three:four' | $SIGIL -i '{{ stdin | split "," | splitkv ":" | joinkv "=" | join "," }}')
   [[ "$result" == "one=two,three=four" ]]
 }
+
+T_json() {
+	result=$(echo '{"one": "two"}' | $SIGIL -i '{{ stdin | json | tojson }}')
+	[[ "$result" == "{\"one\":\"two\"}" ]]
+}
+
+T_yaml() {
+	yaml="$(echo -e "one: two\nthree:\n- four\n- five")"
+	result="$(echo -e "$yaml" | $SIGIL -i '{{ stdin | yaml | toyaml }}')"
+	[[ "$result" == "$yaml" ]]
+}

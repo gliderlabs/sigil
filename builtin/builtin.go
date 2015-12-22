@@ -43,7 +43,9 @@ func init() {
 		// structured data
 		"pointer": Pointer,
 		"json":    Json,
+		"tojson":  ToJson,
 		"yaml":    Yaml,
+		"toyaml":  ToYaml,
 		"uniq":    Uniq,
 		"drop":    Drop,
 		"append":  Append,
@@ -222,6 +224,14 @@ func Json(file interface{}) (interface{}, error) {
 	return obj, nil
 }
 
+func ToJson(obj interface{}) (interface{}, error) {
+	data, err := json.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+	return string(data), nil
+}
+
 func Yaml(file interface{}) (interface{}, error) {
 	var obj interface{}
 	f, err := read(file)
@@ -233,6 +243,14 @@ func Yaml(file interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return obj, nil
+}
+
+func ToYaml(obj interface{}) (interface{}, error) {
+	data, err := yaml.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+	return string(data), nil
 }
 
 func Pointer(path string, in interface{}) (interface{}, error) {
