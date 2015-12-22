@@ -3,6 +3,8 @@ package sigil
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,6 +19,29 @@ var (
 )
 
 var fnMap = template.FuncMap{}
+
+type NamedReader struct {
+	io.Reader
+	Name string
+}
+
+func String(in interface{}) (string, string, bool) {
+	switch obj := in.(type) {
+	case string:
+		return obj, "", true
+	case NamedReader:
+		data, err := ioutil.ReadAll(obj)
+		if err != nil {
+			// TODO: better overall error/panic handling
+			panic(err)
+		}
+		return string(data), obj.Name, true
+	case fmt.Stringer:
+		return obj.String(), "", true
+	default:
+		return "", "", false
+	}
+}
 
 func Register(fm template.FuncMap) {
 	for k, v := range fm {

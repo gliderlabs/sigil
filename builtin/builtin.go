@@ -20,36 +20,75 @@ import (
 
 func init() {
 	sigil.Register(template.FuncMap{
-		"seq":        Seq,
-		"default":    Default,
-		"join":       Join,
-		"split":      Split,
+		// templating
+		"include": Include,
+		"default": Default,
+		"var":     Var,
+		// strings
 		"capitalize": Capitalize,
 		"lower":      Lower,
 		"upper":      Upper,
 		"replace":    Replace,
 		"trim":       Trim,
-		"file":       File,
-		"json":       Json,
-		"yaml":       Yaml,
-		"pointer":    Pointer,
-		"include":    Include,
 		"indent":     Indent,
-		"var":        Var,
 		"match":      Match,
 		"render":     Render,
-		"exists":     Exists,
-		"dir":        Dir,
-		"dirs":       Dirs,
-		"files":      Files,
-		"uniq":       Uniq,
-		"drop":       Drop,
-		"append":     Append,
 		"stdin":      Stdin,
+		// filesystem
+		"file":   File,
+		"exists": Exists,
+		"dir":    Dir,
+		"dirs":   Dirs,
+		"files":  Files,
+		// structured data
+		"pointer": Pointer,
+		"json":    Json,
+		"yaml":    Yaml,
+		"uniq":    Uniq,
+		"drop":    Drop,
+		"append":  Append,
+		"seq":     Seq,
+		"join":    Join,
+		"joinkv":  JoinKv,
+		"split":   Split,
+		"splitkv": SplitKv,
 	})
 }
 
-func Seq(i interface{}) ([]string, error) {
+func JoinKv(sep string, in interface{}) ([]interface{}, error) {
+	m, ok := in.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("joinkv must be given a string map of strings")
+	}
+	var elements []interface{}
+	for k, v := range m {
+		s, ok := v.(string)
+		if !ok {
+			return nil, fmt.Errorf("joinkv must be given a string map of strings")
+		}
+		elements = append(elements, strings.Join([]string{k, s}, sep))
+	}
+	return elements, nil
+}
+
+func SplitKv(sep string, in []interface{}) (interface{}, error) {
+	out := make(map[string]interface{})
+	for i := range in {
+		v, ok := in[i].(string)
+		if !ok {
+			return nil, fmt.Errorf("joinkv must be given a string map of strings")
+		}
+		parts := strings.SplitN(v, sep, 2)
+		if len(parts) == 2 {
+			out[parts[0]] = parts[1]
+		} else {
+			out[v] = true
+		}
+	}
+	return out, nil
+}
+
+func Seq(i interface{}) ([]interface{}, error) {
 	var num int
 	var err error
 	var valid bool
@@ -65,7 +104,7 @@ func Seq(i interface{}) ([]string, error) {
 	if !valid {
 		return nil, fmt.Errorf("seq must be given an integer or numeric string")
 	}
-	var el []string
+	var el []interface{}
 	for i, _ := range make([]bool, num) {
 		el = append(el, strconv.Itoa(i))
 	}
@@ -82,7 +121,7 @@ func Default(value, in interface{}) interface{} {
 	return in
 }
 
-func Join(delim string, in []interface{}) string {
+func Join(delim string, in []interface{}) interface{} {
 	var elements []string
 	for _, el := range in {
 		str, ok := el.(string)
@@ -93,38 +132,66 @@ func Join(delim string, in []interface{}) string {
 	return strings.Join(elements, delim)
 }
 
-func Split(delim string, in string) []string {
-	return strings.Split(in, delim)
+func Split(delim string, in interface{}) ([]interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return nil, fmt.Errorf("split must be given a string")
+	}
+	var elements []interface{}
+	for _, v := range strings.Split(in_, delim) {
+		elements = append(elements, v)
+	}
+	return elements, nil
 }
 
-func Capitalize(in string) string {
-	return strings.Title(in)
+func Capitalize(in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return "", fmt.Errorf("capitalize must be given a string")
+	}
+	return strings.Title(in_), nil
 }
 
-func Lower(in string) string {
-	return strings.ToLower(in)
+func Lower(in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return "", fmt.Errorf("lower must be given a string")
+	}
+	return strings.ToLower(in_), nil
 }
 
-func Upper(in string) string {
-	return strings.ToUpper(in)
+func Upper(in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return "", fmt.Errorf("upper must be given a string")
+	}
+	return strings.ToUpper(in_), nil
 }
 
-func Replace(old, new, in string) string {
-	return strings.Replace(in, old, new, -1)
+func Replace(old, new string, in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return "", fmt.Errorf("replace must be given a string")
+	}
+	return strings.Replace(in_, old, new, -1), nil
 }
 
-func Trim(in string) string {
-	return strings.Trim(in, " \n")
+func Trim(in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return "", fmt.Errorf("trim must be given a string")
+	}
+	return strings.Trim(in_, " \n"), nil
 }
 
 func read(file interface{}) ([]byte, error) {
-	stdin, ok := file.(stdinStr)
+	reader, ok := file.(sigil.NamedReader)
 	if ok {
-		return []byte(stdin), nil
+		return ioutil.ReadAll(reader)
 	}
-	path, ok := file.(string)
+	path, _, ok := sigil.String(file)
 	if !ok {
-		return []byte{}, fmt.Errorf("file must be path string or stdin")
+		return []byte{}, fmt.Errorf("file must be stream or path string")
 	}
 	filepath, err := sigil.LookPath(path)
 	if err != nil {
@@ -137,7 +204,7 @@ func read(file interface{}) ([]byte, error) {
 	return data, nil
 }
 
-func File(filename string) (string, error) {
+func File(filename interface{}) (interface{}, error) {
 	str, err := read(filename)
 	return string(str), err
 }
@@ -185,7 +252,7 @@ func Pointer(path string, in interface{}) (interface{}, error) {
 	return jsonpointer.Get(m, path), nil
 }
 
-func Render(args ...interface{}) (string, error) {
+func Render(args ...interface{}) (interface{}, error) {
 	if len(args) == 0 {
 		fmt.Errorf("render cannot be used without arguments")
 	}
@@ -220,7 +287,7 @@ func render(data []byte, args []interface{}, name string) (bytes.Buffer, error) 
 	return sigil.Execute(data, vars, name)
 }
 
-func Include(filename string, args ...interface{}) (string, error) {
+func Include(filename string, args ...interface{}) (interface{}, error) {
 	path, err := sigil.LookPath(filename)
 	if err != nil {
 		return "", err
@@ -235,9 +302,13 @@ func Include(filename string, args ...interface{}) (string, error) {
 	return render.String(), err
 }
 
-func Indent(indent, in string) string {
+func Indent(indent string, in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return "", fmt.Errorf("indent must be given a string")
+	}
 	var indented []string
-	lines := strings.Split(in, "\n")
+	lines := strings.Split(in_, "\n")
 	indented = append(indented, lines[0])
 	if len(lines) > 1 {
 		for _, line := range lines[1:] {
@@ -248,26 +319,38 @@ func Indent(indent, in string) string {
 			}
 		}
 	}
-	return strings.Join(indented, "\n")
+	return strings.Join(indented, "\n"), nil
 }
 
-func Var(name string) string {
+func Var(name string) interface{} {
 	return os.Getenv(name)
 }
 
-func Match(pattern string, str string) (bool, error) {
+func Match(pattern string, in interface{}) (bool, error) {
+	str, _, ok := sigil.String(in)
+	if !ok {
+		return false, fmt.Errorf("match must be given a string")
+	}
 	return path.Match(pattern, str)
 }
 
-func Exists(filename string) bool {
+func Exists(in interface{}) (bool, error) {
+	filename, _, ok := sigil.String(in)
+	if !ok {
+		return false, fmt.Errorf("exists must be given a string")
+	}
 	_, err := sigil.LookPath(filename)
 	if err != nil {
-		return false
+		return false, nil
 	}
-	return true
+	return true, nil
 }
 
-func Dir(path string) ([]interface{}, error) {
+func Dir(in interface{}) ([]interface{}, error) {
+	path, _, ok := sigil.String(in)
+	if !ok {
+		return nil, fmt.Errorf("dir must be given a string")
+	}
 	var files []interface{}
 	dir, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -279,7 +362,11 @@ func Dir(path string) ([]interface{}, error) {
 	return files, nil
 }
 
-func Dirs(path string) ([]interface{}, error) {
+func Dirs(in interface{}) ([]interface{}, error) {
+	path, _, ok := sigil.String(in)
+	if !ok {
+		return nil, fmt.Errorf("dirs must be given a string")
+	}
 	var dirs []interface{}
 	dir, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -293,7 +380,11 @@ func Dirs(path string) ([]interface{}, error) {
 	return dirs, nil
 }
 
-func Files(path string) ([]interface{}, error) {
+func Files(in interface{}) ([]interface{}, error) {
+	path, _, ok := sigil.String(in)
+	if !ok {
+		return nil, fmt.Errorf("files must be given a string")
+	}
 	var files []interface{}
 	dir, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -321,14 +412,8 @@ func Uniq(in ...[]interface{}) []interface{} {
 	return uniq
 }
 
-type stdinStr string
-
-func Stdin() (stdinStr, error) {
-	data, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		return "", err
-	}
-	return stdinStr(data), nil
+func Stdin() (interface{}, error) {
+	return sigil.NamedReader{os.Stdin, "<stdin>"}, nil
 }
 
 func Append(item interface{}, items []interface{}) []interface{} {

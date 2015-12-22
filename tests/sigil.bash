@@ -60,3 +60,13 @@ T_XXX() {
   result=$(echo 'XXX' | $SIGIL)
   [[ "$result" == "XXX" ]]
 }
+
+T_split_join() {
+  result=$(echo 'one,two,three' | $SIGIL -i '{{ stdin | split "," | join ":" }}')
+  [[ "$result" == "one:two:three" ]]
+}
+
+T_splitkv_joinkv() {
+  result=$(echo 'one:two,three:four' | $SIGIL -i '{{ stdin | split "," | splitkv ":" | joinkv "=" | join "," }}')
+  [[ "$result" == "one=two,three=four" ]]
+}
