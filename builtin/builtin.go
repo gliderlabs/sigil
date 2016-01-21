@@ -10,12 +10,15 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
+	"os/exec"
+	"net/http"
 	"strings"
 	"text/template"
 
 	"github.com/dustin/go-jsonpointer"
 	"github.com/gliderlabs/sigil"
 	"gopkg.in/yaml.v2"
+	"github.com/flynn/go-shlex"
 )
 
 func init() {
@@ -40,6 +43,10 @@ func init() {
 		"dir":    Dir,
 		"dirs":   Dirs,
 		"files":  Files,
+		"text": Text,
+		// external
+		"sh": Shell,
+		"httpget": HttpGet,
 		// structured data
 		"pointer": Pointer,
 		"json":    Json,
@@ -56,6 +63,39 @@ func init() {
 		"splitkv": SplitKv,
 	})
 }
+
+func Shell(in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return "", fmt.Errorf("sh must be given a string")
+	}
+	args, err := shlex.Split(in_)
+	if err != nil {
+		return "", err
+	}
+	path, err := exec.LookPath(args[0])
+	if err != nil {
+		return "", err
+	}
+	out, err := exec.Command(path, args[1:]...).Output()
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
+func HttpGet(in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return "", fmt.Errorf("httpget must be given a string")
+	}
+	resp, err := http.Get(in_)
+	if err != nil {
+		return "", err
+	}
+	return sigil.NamedReader{resp.Body, "<"+in_+">"}, nil
+}
+
 
 func JoinKv(sep string, in interface{}) ([]interface{}, error) {
 	m, ok := in.(map[string]interface{})
@@ -209,6 +249,14 @@ func read(file interface{}) ([]byte, error) {
 func File(filename interface{}) (interface{}, error) {
 	str, err := read(filename)
 	return string(str), err
+}
+
+func Text(file interface{}) (interface{}, error) {
+	f, err := read(file)
+	if err != nil {
+		return nil, err
+	}
+	return string(f), nil
 }
 
 func Json(file interface{}) (interface{}, error) {

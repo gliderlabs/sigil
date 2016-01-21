@@ -81,3 +81,13 @@ T_yaml() {
 	result="$(echo -e "$yaml" | $SIGIL -i '{{ stdin | yaml | toyaml }}')"
 	[[ "$result" == "$yaml" ]]
 }
+
+T_shell() {
+  result="$($SIGIL -i '{{ sh "date +%m-%d-%Y" }}')"
+	[[ "$result" == "$(date +%m-%d-%Y)" ]]
+}
+
+T_httpget() {
+  result="$($SIGIL -i '{{ httpget "https://httpbin.org/get" | json | pointer "/url" }}')"
+	[[ "$result" == "https://httpbin.org/get" ]]
+}
