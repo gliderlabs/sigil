@@ -284,9 +284,9 @@ func Render(args ...interface{}) (interface{}, error) {
 }
 
 func render(data []byte, args []interface{}, name string) (bytes.Buffer, error) {
-	vars := make(map[string]string)
+	vars := make(map[string]interface{})
 	for _, arg := range args {
-		mv, ok := arg.(map[string]string)
+		mv, ok := arg.(map[string]interface{})
 		if ok {
 			for k, v := range mv {
 				vars[k] = v

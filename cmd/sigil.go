@@ -52,7 +52,7 @@ func main() {
 	if os.Getenv("SIGIL_PATH") != "" {
 		sigil.TemplatePath = strings.Split(os.Getenv("SIGIL_PATH"), ":")
 	}
-	vars := make(map[string]string)
+	vars := make(map[string]interface{})
 	for _, arg := range flag.Args() {
 		parts := strings.SplitN(arg, "=", 2)
 		if len(parts) == 2 {

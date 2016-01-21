@@ -80,17 +80,18 @@ func restoreEnv(env []string) {
 	}
 }
 
-func Execute(input []byte, vars map[string]string, name string) (bytes.Buffer, error) {
+func Execute(input []byte, vars map[string]interface{}, name string) (bytes.Buffer, error) {
 	var tmplVars string
 	var err error
 	defer restoreEnv(os.Environ())
-	for k, v := range vars {
-		err := os.Setenv(k, v)
-		if err != nil {
-			return bytes.Buffer{}, err
+	for k, iv := range vars {
+		if v, ok := iv.(string); ok {
+			err := os.Setenv(k, v)
+			if err != nil {
+				return bytes.Buffer{}, err
+			}
 		}
-		escaped := strings.Replace(v, "\"", "\\\"", -1)
-		tmplVars = tmplVars + fmt.Sprintf("{{ $%s := \"%s\" }}", k, escaped)
+		tmplVars = tmplVars + fmt.Sprintf("{{ $%s := .%s }}", k, k)
 	}
 	inputStr := string(input)
 	if PosixPreprocess {
