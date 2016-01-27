@@ -3,6 +3,7 @@ package builtin
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,6 +26,7 @@ func init() {
 	sigil.Register(template.FuncMap{
 		// templating
 		"include": Include,
+		"partial": Partial,
 		"default": Default,
 		"var":     Var,
 		// strings
@@ -366,6 +368,17 @@ func Include(filename string, args ...interface{}) (interface{}, error) {
 	defer sigil.PopPath()
 	render, err := render(data, args, filepath.Base(path))
 	return render.String(), err
+}
+
+func Partial(filename string) (interface{}, error) {
+	var vars []interface{}
+	for _, arg := range flag.Args() {
+		parts := strings.SplitN(arg, "=", 2)
+		if len(parts) == 2 {
+			vars = append(vars, arg)
+		}
+	}
+	return Include(filename, vars...)
 }
 
 func Indent(indent string, in interface{}) (interface{}, error) {
