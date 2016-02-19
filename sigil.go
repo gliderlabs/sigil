@@ -16,9 +16,22 @@ import (
 var (
 	TemplatePath    []string
 	PosixPreprocess bool
+	leftDelim       string
+	rightDelim      string
 )
 
 var fnMap = template.FuncMap{}
+
+func init() {
+	leftDelim = os.Getenv("SIGIL_LEFT_DELIM")
+	if leftDelim == "" {
+		leftDelim = "{{"
+	}
+	rightDelim = os.Getenv("SIGIL_RIGHT_DELIM")
+	if rightDelim == "" {
+		rightDelim = "}}"
+	}
+}
 
 type NamedReader struct {
 	io.Reader
@@ -91,7 +104,7 @@ func Execute(input []byte, vars map[string]interface{}, name string) (bytes.Buff
 				return bytes.Buffer{}, err
 			}
 		}
-		tmplVars = tmplVars + fmt.Sprintf("{{ $%s := .%s }}", k, k)
+		tmplVars = tmplVars + fmt.Sprintf("%s $%s := .%s %s", leftDelim, k, k, rightDelim)
 	}
 	inputStr := string(input)
 	if PosixPreprocess {
@@ -100,8 +113,14 @@ func Execute(input []byte, vars map[string]interface{}, name string) (bytes.Buff
 			return bytes.Buffer{}, err
 		}
 	}
-	inputStr = strings.Replace(inputStr, "\\}}\n{{", "}}{{", -1)
-	tmpl, err := template.New(name).Funcs(fnMap).Parse(tmplVars + inputStr)
+
+	inputStr = strings.Replace(
+		inputStr,
+		fmt.Sprintf("\\%s\n%s", rightDelim, leftDelim),
+		fmt.Sprintf("%s%s", rightDelim, leftDelim),
+		-1,
+	)
+	tmpl, err := template.New(name).Funcs(fnMap).Delims(leftDelim, rightDelim).Parse(tmplVars + inputStr)
 	if err != nil {
 		return bytes.Buffer{}, err
 	}

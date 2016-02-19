@@ -91,3 +91,9 @@ T_httpget() {
   result="$($SIGIL -i '{{ httpget "https://httpbin.org/get" | json | pointer "/url" }}')"
 	[[ "$result" == "https://httpbin.org/get" ]]
 }
+
+T_custom_delim() {
+  result="$(SIGIL_LEFT_DELIM={{{ SIGIL_RIGHT_DELIM=}}} $SIGIL -i '{{ hello {{{ $name }}} }}' name=packer)"
+	[[ "$result" == "{{ hello packer }}" ]]
+
+}
