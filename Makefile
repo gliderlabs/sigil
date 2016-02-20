@@ -1,7 +1,7 @@
 NAME=sigil
 ARCH=$(shell uname -m)
 ORG=gliderlabs
-VERSION=0.3.3
+VERSION=0.4.0
 
 build:
 	glu build darwin,linux ./cmd

@@ -60,3 +60,40 @@ T_XXX() {
   result=$(echo 'XXX' | $SIGIL)
   [[ "$result" == "XXX" ]]
 }
+
+T_split_join() {
+  result=$(echo 'one,two,three' | $SIGIL -i '{{ stdin | split "," | join ":" }}')
+  [[ "$result" == "one:two:three" ]]
+}
+
+T_splitkv_joinkv() {
+  result=$(echo 'one:two,three:four' | $SIGIL -i '{{ stdin | split "," | splitkv ":" | joinkv "=" | join "," }}')
+  [[ "$result" == "one=two,three=four" ]]
+}
+
+T_json() {
+	result=$(echo '{"one": "two"}' | $SIGIL -i '{{ stdin | json | tojson }}')
+	[[ "$result" == "{\"one\":\"two\"}" ]]
+}
+
+T_yaml() {
+	yaml="$(echo -e "one: two\nthree:\n- four\n- five")"
+	result="$(echo -e "$yaml" | $SIGIL -i '{{ stdin | yaml | toyaml }}')"
+	[[ "$result" == "$yaml" ]]
+}
+
+T_shell() {
+  result="$($SIGIL -i '{{ sh "date +%m-%d-%Y" }}')"
+	[[ "$result" == "$(date +%m-%d-%Y)" ]]
+}
+
+T_httpget() {
+  result="$($SIGIL -i '{{ httpget "https://httpbin.org/get" | json | pointer "/url" }}')"
+	[[ "$result" == "https://httpbin.org/get" ]]
+}
+
+T_custom_delim() {
+  result="$(SIGIL_LEFT_DELIM={{{ SIGIL_RIGHT_DELIM=}}} $SIGIL -i '{{ hello {{{ $name }}} }}' name=packer)"
+	[[ "$result" == "{{ hello packer }}" ]]
+
+}

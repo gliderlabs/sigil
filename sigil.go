@@ -3,6 +3,8 @@ package sigil
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,9 +16,45 @@ import (
 var (
 	TemplatePath    []string
 	PosixPreprocess bool
+	leftDelim       string
+	rightDelim      string
 )
 
 var fnMap = template.FuncMap{}
+
+func init() {
+	leftDelim = os.Getenv("SIGIL_LEFT_DELIM")
+	if leftDelim == "" {
+		leftDelim = "{{"
+	}
+	rightDelim = os.Getenv("SIGIL_RIGHT_DELIM")
+	if rightDelim == "" {
+		rightDelim = "}}"
+	}
+}
+
+type NamedReader struct {
+	io.Reader
+	Name string
+}
+
+func String(in interface{}) (string, string, bool) {
+	switch obj := in.(type) {
+	case string:
+		return obj, "", true
+	case NamedReader:
+		data, err := ioutil.ReadAll(obj)
+		if err != nil {
+			// TODO: better overall error/panic handling
+			panic(err)
+		}
+		return string(data), obj.Name, true
+	case fmt.Stringer:
+		return obj.String(), "", true
+	default:
+		return "", "", false
+	}
+}
 
 func Register(fm template.FuncMap) {
 	for k, v := range fm {
@@ -55,17 +93,18 @@ func restoreEnv(env []string) {
 	}
 }
 
-func Execute(input []byte, vars map[string]string, name string) (bytes.Buffer, error) {
+func Execute(input []byte, vars map[string]interface{}, name string) (bytes.Buffer, error) {
 	var tmplVars string
 	var err error
 	defer restoreEnv(os.Environ())
-	for k, v := range vars {
-		err := os.Setenv(k, v)
-		if err != nil {
-			return bytes.Buffer{}, err
+	for k, iv := range vars {
+		if v, ok := iv.(string); ok {
+			err := os.Setenv(k, v)
+			if err != nil {
+				return bytes.Buffer{}, err
+			}
 		}
-		escaped := strings.Replace(v, "\"", "\\\"", -1)
-		tmplVars = tmplVars + fmt.Sprintf("{{ $%s := \"%s\" }}", k, escaped)
+		tmplVars = tmplVars + fmt.Sprintf("%s $%s := .%s %s", leftDelim, k, k, rightDelim)
 	}
 	inputStr := string(input)
 	if PosixPreprocess {
@@ -74,8 +113,14 @@ func Execute(input []byte, vars map[string]string, name string) (bytes.Buffer, e
 			return bytes.Buffer{}, err
 		}
 	}
-	inputStr = strings.Replace(inputStr, "\\}}\n{{", "}}{{", -1)
-	tmpl, err := template.New(name).Funcs(fnMap).Parse(tmplVars + inputStr)
+
+	inputStr = strings.Replace(
+		inputStr,
+		fmt.Sprintf("\\%s\n%s", rightDelim, leftDelim),
+		fmt.Sprintf("%s%s", rightDelim, leftDelim),
+		-1,
+	)
+	tmpl, err := template.New(name).Funcs(fnMap).Delims(leftDelim, rightDelim).Parse(tmplVars + inputStr)
 	if err != nil {
 		return bytes.Buffer{}, err
 	}
