@@ -17,6 +17,7 @@ import (
 
 	"github.com/dustin/go-jsonpointer"
 	"github.com/flynn/go-shlex"
+	yyaml "github.com/ghodss/yaml"
 	"github.com/gliderlabs/sigil"
 	"gopkg.in/yaml.v2"
 )
@@ -49,19 +50,20 @@ func init() {
 		"sh":      Shell,
 		"httpget": HttpGet,
 		// structured data
-		"pointer": Pointer,
-		"json":    Json,
-		"tojson":  ToJson,
-		"yaml":    Yaml,
-		"toyaml":  ToYaml,
-		"uniq":    Uniq,
-		"drop":    Drop,
-		"append":  Append,
-		"seq":     Seq,
-		"join":    Join,
-		"joinkv":  JoinKv,
-		"split":   Split,
-		"splitkv": SplitKv,
+		"pointer":    Pointer,
+		"json":       Json,
+		"tojson":     ToJson,
+		"yaml":       Yaml,
+		"toyaml":     ToYaml,
+		"uniq":       Uniq,
+		"drop":       Drop,
+		"append":     Append,
+		"seq":        Seq,
+		"join":       Join,
+		"joinkv":     JoinKv,
+		"split":      Split,
+		"splitkv":    SplitKv,
+		"yamltojson": YamlToJson,
 	})
 }
 
@@ -317,6 +319,19 @@ func ToYaml(obj interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return string(data), nil
+}
+
+func YamlToJson(in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return nil, fmt.Errorf("ymltojson must be given a string")
+	}
+
+	j2, err := yyaml.YAMLToJSON([]byte(in_))
+	if err != nil {
+		return nil, err
+	}
+	return string(j2), nil
 }
 
 func Pointer(path string, in interface{}) (interface{}, error) {
