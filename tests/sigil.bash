@@ -138,3 +138,13 @@ T_jmespath() {
   result="$(echo '[{"name":"bob","age":20},{"name":"jim","age":30},{"name":"joe","age":40}]' | $SIGIL -i '{{stdin | json | jmespath "[? age >= `30`].name | reverse(@)"  | join ","}}')"
     [[ "$result" == 'joe,jim' ]]
 }
+
+T_base64enc() {
+  result="$(echo 'happybirthday' | $SIGIL -i '{{ stdin | base64enc }}')"
+	[[ "$result" == "aGFwcHliaXJ0aGRheQo=" ]]
+}
+
+T_base64dec() {
+  result="$(echo 'aGFwcHliaXJ0aGRheQo=' | $SIGIL -i '{{ stdin | base64dec }}')"
+	[[ "$result" == "happybirthday" ]]
+}
