@@ -2,6 +2,7 @@ package builtin
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -38,6 +39,8 @@ func init() {
 		"render":     Render,
 		"stdin":      Stdin,
 		"substr":     Substring,
+		"base64enc":  Base64Encode,
+		"base64dec":  Base64Decode,
 		// filesystem
 		"file":   File,
 		"exists": Exists,
@@ -275,6 +278,26 @@ func Text(file interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return string(f), nil
+}
+
+func Base64Encode(file interface{}) (interface{}, error) {
+	f, err := read(file)
+	if err != nil {
+		return nil, err
+	}
+	return base64.StdEncoding.EncodeToString(f), nil
+}
+
+func Base64Decode(file interface{}) (interface{}, error) {
+	f, err := read(file)
+	if err != nil {
+		return nil, err
+	}
+	decoded, err := base64.StdEncoding.DecodeString(string(f))
+	if err != nil {
+		return nil, err
+	}
+	return string(decoded), nil
 }
 
 func Json(file interface{}) (interface{}, error) {

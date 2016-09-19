@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 ### Added
+- Add base64enc and base64dec functions
 
 ### Removed
 

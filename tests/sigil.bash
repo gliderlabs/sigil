@@ -106,3 +106,13 @@ T_substr_single_index() {
 	[[ "$result" == "abcd" ]]
 }
 
+T_base64enc() {
+  result="$(echo 'happybirthday' | $SIGIL -i '{{ stdin | base64enc }}')"
+	[[ "$result" == "aGFwcHliaXJ0aGRheQo=" ]]
+}
+
+T_base64dec() {
+  result="$(echo 'aGFwcHliaXJ0aGRheQo=' | $SIGIL -i '{{ stdin | base64dec }}')"
+	[[ "$result" == "happybirthday" ]]
+}
+
