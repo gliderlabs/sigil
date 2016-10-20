@@ -97,7 +97,6 @@ func HttpGet(in interface{}) (interface{}, error) {
 	return sigil.NamedReader{resp.Body, "<"+in_+">"}, nil
 }
 
-
 func JoinKv(sep string, in interface{}) ([]interface{}, error) {
 	m, ok := in.(map[string]interface{})
 	if !ok {
@@ -119,7 +118,7 @@ func SplitKv(sep string, in []interface{}) (interface{}, error) {
 	for i := range in {
 		v, ok := in[i].(string)
 		if !ok {
-			return nil, fmt.Errorf("joinkv must be given a string map of strings")
+			return nil, fmt.Errorf("splitkv must be given a string map of strings")
 		}
 		parts := strings.SplitN(v, sep, 2)
 		if len(parts) == 2 {
