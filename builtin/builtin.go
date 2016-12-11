@@ -19,6 +19,8 @@ import (
 	"github.com/flynn/go-shlex"
 	"github.com/gliderlabs/sigil"
 	"gopkg.in/yaml.v2"
+
+	yyaml "github.com/ghodss/yaml"
 )
 
 func init() {
@@ -94,7 +96,7 @@ func HttpGet(in interface{}) (interface{}, error) {
 	if err != nil {
 		return "", err
 	}
-	return sigil.NamedReader{resp.Body, "<"+in_+">"}, nil
+	return sigil.NamedReader{resp.Body, "<" + in_ + ">"}, nil
 }
 
 func JoinKv(sep string, in interface{}) ([]interface{}, error) {
@@ -290,7 +292,12 @@ func Json(file interface{}) (interface{}, error) {
 }
 
 func ToJson(obj interface{}) (interface{}, error) {
-	data, err := json.Marshal(obj)
+	d, err := yaml.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := yyaml.YAMLToJSON(d)
 	if err != nil {
 		return nil, err
 	}
