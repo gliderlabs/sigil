@@ -76,6 +76,11 @@ T_json() {
 	[[ "$result" == "{\"one\":\"two\"}" ]]
 }
 
+T_json_deep() {
+	result=$(echo '{"foo": {"one": "two"}}' | $SIGIL -i '{{ stdin | json | tojson }}')
+	[[ "$result" == '{"foo":{"one":"two"}}' ]]
+}
+
 T_yaml() {
 	yaml="$(echo -e "one: two\nthree:\n- four\n- five")"
 	result="$(echo -e "$yaml" | $SIGIL -i '{{ stdin | yaml | toyaml }}')"
@@ -104,5 +109,10 @@ T_substr() {
 T_substr_single_index() {
   result="$($SIGIL -i '{{ "abcdefgh" | substr ":4" }}')"
 	[[ "$result" == "abcd" ]]
+}
+
+T_yamltojson() {
+  result="$(printf 'joe:\n  age: 32\n  color: red' | $SIGIL -i '{{ stdin |  yaml | tojson }}')"
+    [[ "$result" == '{"joe":{"age":32,"color":"red"}}' ]]
 }
 
