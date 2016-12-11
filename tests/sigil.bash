@@ -67,8 +67,8 @@ T_split_join() {
 }
 
 T_splitkv_joinkv() {
-  result=$(echo 'one:two,three:four' | $SIGIL -i '{{ stdin | split "," | splitkv ":" | joinkv "=" | join "," }}')
-  [[ "$result" == "one=two,three=four" ]]
+  result=$(echo -n 'one:two,three:four' | $SIGIL -i '{{ stdin | split "," | splitkv ":" | joinkv "=" | join "," }}')
+  [[ "$result" == "one=two,three=four" || "$result" == "three=four,one=two" ]]
 }
 
 T_json() {
