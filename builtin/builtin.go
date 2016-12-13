@@ -289,8 +289,31 @@ func Json(file interface{}) (interface{}, error) {
 	return obj, nil
 }
 
+func convert(v interface{}) interface{} {
+	switch t := v.(type) {
+	case map[interface{}]interface{}:
+		return convertMap(t)
+	}
+	return v
+}
+
+func convertMap(m map[interface{}]interface{}) map[string]interface{} {
+	m2 := make(map[string]interface{})
+	for k, v := range m {
+		switch key := k.(type) {
+		case string:
+			m2[key] = convert(v)
+
+		default:
+			s := k.(string)
+			m2[s] = convert(v)
+		}
+	}
+	return m2
+}
+
 func ToJson(obj interface{}) (interface{}, error) {
-	data, err := json.Marshal(obj)
+	data, err := json.Marshal(convert(obj))
 	if err != nil {
 		return nil, err
 	}

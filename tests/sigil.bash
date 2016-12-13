@@ -67,13 +67,18 @@ T_split_join() {
 }
 
 T_splitkv_joinkv() {
-  result=$(echo 'one:two,three:four' | $SIGIL -i '{{ stdin | split "," | splitkv ":" | joinkv "=" | join "," }}')
-  [[ "$result" == "one=two,three=four" ]]
+  result=$(echo -n 'one:two,three:four' | $SIGIL -i '{{ stdin | split "," | splitkv ":" | joinkv "=" | join "," }}')
+  [[ "$result" == "one=two,three=four" || "$result" == "three=four,one=two" ]]
 }
 
 T_json() {
 	result=$(echo '{"one": "two"}' | $SIGIL -i '{{ stdin | json | tojson }}')
 	[[ "$result" == "{\"one\":\"two\"}" ]]
+}
+
+T_json_deep() {
+	result=$(echo '{"foo": {"one": "two"}}' | $SIGIL -i '{{ stdin | json | tojson }}')
+	[[ "$result" == '{"foo":{"one":"two"}}' ]]
 }
 
 T_yaml() {
@@ -104,5 +109,28 @@ T_substr() {
 T_substr_single_index() {
   result="$($SIGIL -i '{{ "abcdefgh" | substr ":4" }}')"
 	[[ "$result" == "abcd" ]]
+}
+
+T_yamltojson() {
+  result="$(printf 'joe:\n  age: 32\n  color: red' | $SIGIL -i '{{ stdin |  yaml | tojson }}')"
+    [[ "$result" == '{"joe":{"age":32,"color":"red"}}' ]]
+}
+
+T_yamltojsondeep() {
+    result="$( $SIGIL -i '{{ stdin |  yaml | tojson }}' <<EOF
+a: Easy!
+b:
+  c: 2
+  d:
+  - 3
+  - 4
+c:
+  list:
+  - one
+  - two
+  - tree
+EOF
+)"
+    [[ "$result" == '{"a":"Easy!","b":{"c":2,"d":[3,4]},"c":{"list":["one","two","tree"]}}' ]]
 }
 
