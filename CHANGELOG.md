@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 ### Added
+- Add [jmespath](http://jmespath.org) function
 
 ### Removed
 

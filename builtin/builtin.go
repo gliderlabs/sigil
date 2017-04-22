@@ -18,6 +18,7 @@ import (
 	"github.com/dustin/go-jsonpointer"
 	"github.com/flynn/go-shlex"
 	"github.com/gliderlabs/sigil"
+	"github.com/jmespath/go-jmespath"
 	"gopkg.in/yaml.v2"
 )
 
@@ -49,19 +50,20 @@ func init() {
 		"sh":      Shell,
 		"httpget": HttpGet,
 		// structured data
-		"pointer": Pointer,
-		"json":    Json,
-		"tojson":  ToJson,
-		"yaml":    Yaml,
-		"toyaml":  ToYaml,
-		"uniq":    Uniq,
-		"drop":    Drop,
-		"append":  Append,
-		"seq":     Seq,
-		"join":    Join,
-		"joinkv":  JoinKv,
-		"split":   Split,
-		"splitkv": SplitKv,
+		"pointer":  Pointer,
+		"json":     Json,
+		"jmespath": JmesPath,
+		"tojson":   ToJson,
+		"yaml":     Yaml,
+		"toyaml":   ToYaml,
+		"uniq":     Uniq,
+		"drop":     Drop,
+		"append":   Append,
+		"seq":      Seq,
+		"join":     Join,
+		"joinkv":   JoinKv,
+		"split":    Split,
+		"splitkv":  SplitKv,
 	})
 }
 
@@ -94,7 +96,7 @@ func HttpGet(in interface{}) (interface{}, error) {
 	if err != nil {
 		return "", err
 	}
-	return sigil.NamedReader{resp.Body, "<"+in_+">"}, nil
+	return sigil.NamedReader{resp.Body, "<" + in_ + ">"}, nil
 }
 
 func JoinKv(sep string, in interface{}) ([]interface{}, error) {
@@ -356,6 +358,20 @@ func Pointer(path string, in interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("pointer needs a map type")
 	}
 	return jsonpointer.Get(m, path), nil
+}
+
+func JmesPath(path string, in interface{}) (interface{}, error) {
+	precompiled, err := jmespath.Compile(path)
+	if err != nil {
+		return nil, fmt.Errorf("JmesPath compileerror: %v", err)
+	}
+
+	result, err := precompiled.Search(in)
+	if err != nil {
+		return nil, fmt.Errorf("JmesPath search error: %v", err)
+	}
+
+	return result, nil
 }
 
 func Render(args ...interface{}) (interface{}, error) {
