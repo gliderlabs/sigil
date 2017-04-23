@@ -16,6 +16,8 @@ import (
 var (
 	TemplatePath    []string
 	PosixPreprocess bool
+	leftDelim       string
+	rightDelim      string
 )
 
 var leftDelim = "{{"
@@ -23,11 +25,13 @@ var rightDelim = "}}"
 var fnMap = template.FuncMap{}
 
 func init() {
-	delims := os.Getenv("SIGIL_DELIMS")
-	if delims != "" {
-		d := strings.Split(delims, ",")
-		leftDelim = d[0]
-		rightDelim = d[1]
+	leftDelim = os.Getenv("SIGIL_LEFT_DELIM")
+	if leftDelim == "" {
+		leftDelim = "{{"
+	}
+	rightDelim = os.Getenv("SIGIL_RIGHT_DELIM")
+	if rightDelim == "" {
+		rightDelim = "}}"
 	}
 }
 
