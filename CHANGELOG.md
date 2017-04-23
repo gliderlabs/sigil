@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+### Removed
+
+### Changed
+
+## [v0.4.1] - 2017-04-23
+### Fixed
+
+### Added
+
 - Add [jmespath](http://jmespath.org) function
 - Add base64enc and base64dec functions
 
@@ -13,4 +22,6 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-[unreleased]: https://github.com/gliderlabs/glidergun/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/gliderlabs/registrator/compare/v0.4.1...HEAD
+[v0.4.1]: https://github.com/gliderlabs/registrator/compare/v0.4.1...v0.4.0
+
