@@ -20,6 +20,8 @@ var (
 	rightDelim      string
 )
 
+var leftDelim = "{{"
+var rightDelim = "}}"
 var fnMap = template.FuncMap{}
 
 func init() {
