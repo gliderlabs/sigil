@@ -115,4 +115,3 @@ T_base64dec() {
   result="$(echo 'aGFwcHliaXJ0aGRheQo=' | $SIGIL -i '{{ stdin | base64dec }}')"
 	[[ "$result" == "happybirthday" ]]
 }
-

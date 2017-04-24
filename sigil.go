@@ -16,6 +16,8 @@ import (
 var (
 	TemplatePath    []string
 	PosixPreprocess bool
+	leftDelim       string
+	rightDelim      string
 )
 
 var leftDelim = "{{"
