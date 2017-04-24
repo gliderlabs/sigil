@@ -28,10 +28,15 @@ Other releases can be downloaded from [Github Releases](https://github.com/glide
 
 Template text can be provided via STDIN or from a file if provided with the `-f`
 flag. Any other arguments are key-values in the form `<key>=<value>`. They are
-used as variables.
+used as variables. You can use the `-p` flag to enable POSIX variable expansion, 
+like so:
 
  * `echo 'Hello, $name' | sigil -p name=Jeff`
  * `sigil -p -f config.tmpl var1=foo "var2=Hello world"`
+
+Without this flag, you will need to use double-brackets for variables:
+
+ * `echo 'Hello, {{name}}' | sigil name=Jeff`
 
 ### Variables
 
@@ -80,6 +85,8 @@ for functions available:
 
  * [Sigil builtins](http://godoc.org/github.com/gliderlabs/sigil/builtin)
  * [Go template builtins](http://golang.org/pkg/text/template/#hdr-Functions)
+
+> Builtins are disabled when the `-p` flag is set.
 
 Here are a few examples:
 
