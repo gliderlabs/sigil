@@ -58,6 +58,20 @@ in this form is simply used as:
 You can do much more with this syntax, such as modifier pipelines. All of which
 is explained below.
 
+#### Custom Delimiters
+
+Sometimes you want to use sigil to generate text, which uses golang templating itself.
+For example if you want to generate [packer](https://www.packer.io/docs/) configuration
+your template might contain a lot of `{{` and `}}`.
+
+Intead of replacing all `{{` with `{{“{{”}}`, you can change the delimiters,
+by setting the `SIGIL_DELIMS` environment variable. It is the left and right
+delimiter strings, separated by a coma.
+
+```
+SIGIL_DELIMS={{{,}}}  sigil -i 'hello {{{ $name }}}' name=packer
+```
+
 ### Functions
 
 There are a number of builtin functions that can be used as modifiers,

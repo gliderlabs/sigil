@@ -2,23 +2,24 @@ package builtin
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"reflect"
 	"strconv"
-	"os/exec"
-	"net/http"
 	"strings"
 	"text/template"
 
 	"github.com/dustin/go-jsonpointer"
+	"github.com/flynn/go-shlex"
 	"github.com/gliderlabs/sigil"
 	"gopkg.in/yaml.v2"
-	"github.com/flynn/go-shlex"
 )
 
 func init() {
@@ -37,15 +38,18 @@ func init() {
 		"match":      Match,
 		"render":     Render,
 		"stdin":      Stdin,
+		"substr":     Substring,
+		"base64enc":  Base64Encode,
+		"base64dec":  Base64Decode,
 		// filesystem
 		"file":   File,
 		"exists": Exists,
 		"dir":    Dir,
 		"dirs":   Dirs,
 		"files":  Files,
-		"text": Text,
+		"text":   Text,
 		// external
-		"sh": Shell,
+		"sh":      Shell,
 		"httpget": HttpGet,
 		// structured data
 		"pointer": Pointer,
@@ -186,6 +190,23 @@ func Split(delim string, in interface{}) ([]interface{}, error) {
 	return elements, nil
 }
 
+func Substring(slice string, in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return nil, fmt.Errorf("substr must be given a string")
+	}
+	s := strings.Split(slice, ":")
+	start, err := strconv.Atoi(s[0])
+	if err != nil {
+		start = 0
+	}
+	end, err := strconv.Atoi(s[1])
+	if err != nil {
+		return nil, fmt.Errorf("substr needs slice expression as 'start:end' ")
+	}
+	return in_[start:end], nil
+}
+
 func Capitalize(in interface{}) (interface{}, error) {
 	in_, _, ok := sigil.String(in)
 	if !ok {
@@ -257,6 +278,26 @@ func Text(file interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return string(f), nil
+}
+
+func Base64Encode(file interface{}) (interface{}, error) {
+	f, err := read(file)
+	if err != nil {
+		return nil, err
+	}
+	return base64.StdEncoding.EncodeToString(f), nil
+}
+
+func Base64Decode(file interface{}) (interface{}, error) {
+	f, err := read(file)
+	if err != nil {
+		return nil, err
+	}
+	decoded, err := base64.StdEncoding.DecodeString(string(f))
+	if err != nil {
+		return nil, err
+	}
+	return string(decoded), nil
 }
 
 func Json(file interface{}) (interface{}, error) {

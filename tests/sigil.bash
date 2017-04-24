@@ -93,7 +93,25 @@ T_httpget() {
 }
 
 T_custom_delim() {
-  result="$(SIGIL_LEFT_DELIM={{{ SIGIL_RIGHT_DELIM=}}} $SIGIL -i '{{ hello {{{ $name }}} }}' name=packer)"
+  result="$(SIGIL_DELIMS={{{,}}} $SIGIL -i '{{ hello {{{ $name }}} }}' name=packer)"
 	[[ "$result" == "{{ hello packer }}" ]]
+}
 
+T_substr() {
+  result="$($SIGIL -i '{{ "abcdefgh" | substr "1:4" }}')"
+	[[ "$result" == "bcd" ]]
+}
+T_substr_single_index() {
+  result="$($SIGIL -i '{{ "abcdefgh" | substr ":4" }}')"
+	[[ "$result" == "abcd" ]]
+}
+
+T_base64enc() {
+  result="$(echo 'happybirthday' | $SIGIL -i '{{ stdin | base64enc }}')"
+	[[ "$result" == "aGFwcHliaXJ0aGRheQo=" ]]
+}
+
+T_base64dec() {
+  result="$(echo 'aGFwcHliaXJ0aGRheQo=' | $SIGIL -i '{{ stdin | base64dec }}')"
+	[[ "$result" == "happybirthday" ]]
 }
