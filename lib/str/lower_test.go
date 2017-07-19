@@ -4,6 +4,7 @@ import "testing"
 import "github.com/gliderlabs/sigil/pkg/sigil"
 
 func TestLower(t *testing.T) {
+	t.Parallel()
 	for _, tt := range []strTest{
 		{[]interface{}{"lowercase string"}, "lowercase string", nil},
 		{[]interface{}{"LowerCase String"}, "lowercase string", nil},

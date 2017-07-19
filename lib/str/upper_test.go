@@ -7,6 +7,7 @@ import (
 )
 
 func TestUpper(t *testing.T) {
+	t.Parallel()
 	for _, tt := range []strTest{
 		{[]interface{}{"UPPERCASE STRING"}, "UPPERCASE STRING", nil},
 		{[]interface{}{"UpperCase String"}, "UPPERCASE STRING", nil},

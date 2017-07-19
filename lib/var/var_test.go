@@ -1,4 +1,4 @@
-package fmt
+package var_
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-type fmtTest struct {
+type varTest struct {
 	args        []interface{}
 	expected    interface{}
 	expectedErr error
@@ -15,8 +15,8 @@ type fmtTest struct {
 func TestModuleFunc(t *testing.T) {
 	t.Parallel()
 	tmpl, err := template.New("").Funcs(template.FuncMap{
-		"fmt": ModuleFunc,
-	}).Parse(`{{ "Hello\nWorld" | fmt.Indent "  " }}`)
+		"var": ModuleFunc,
+	}).Parse(`{{ "" | var.Default "hello" }}`)
 	if err != nil {
 		t.Error(err)
 	}
@@ -24,7 +24,7 @@ func TestModuleFunc(t *testing.T) {
 	if err := tmpl.Execute(&buf, nil); err != nil {
 		t.Error(err)
 	}
-	if got := buf.String(); got != "  Hello\n  World" {
+	if got := buf.String(); got != "hello" {
 		t.Errorf("unexpected executed template content: %s", got)
 	}
 }

@@ -1,24 +1,16 @@
 NAME=sigil
 ARCH=$(shell uname -m)
 ORG=gliderlabs
-VERSION=0.4.0
+VERSION=0.6.0
 
 build:
-	glu build darwin,linux ./cmd
-
-test:
-	basht tests/*.bash
+	go build ./cmd/sigil
 
 install: build
-	install build/$(shell uname -s)/sigil /usr/local/bin
+	install sigil /usr/local/bin/sigil
 
-deps:
-	go get github.com/gliderlabs/glu
-	go get -u github.com/progrium/basht/...
-	go get -d ./cmd
-
-release:
-	glu release v$(VERSION)
+test:
+	go test -v -race ./...
 
 clean:
 	rm -rf build release

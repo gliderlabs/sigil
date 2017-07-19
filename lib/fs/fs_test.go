@@ -1,22 +1,26 @@
-package fmt
+package fs
 
 import (
 	"bytes"
 	"html/template"
 	"testing"
+
+	"github.com/spf13/afero"
 )
 
-type fmtTest struct {
+type fsTest struct {
 	args        []interface{}
 	expected    interface{}
-	expectedErr error
+	expectedErr interface{}
 }
 
 func TestModuleFunc(t *testing.T) {
 	t.Parallel()
+	fs := afero.NewMemMapFs()
+	afero.WriteFile(fs, "file.txt", []byte("hello"), 0644)
 	tmpl, err := template.New("").Funcs(template.FuncMap{
-		"fmt": ModuleFunc,
-	}).Parse(`{{ "Hello\nWorld" | fmt.Indent "  " }}`)
+		"fs": ModuleFunc(fs),
+	}).Parse(`{{ fs.Read "file.txt" }}`)
 	if err != nil {
 		t.Error(err)
 	}
@@ -24,7 +28,7 @@ func TestModuleFunc(t *testing.T) {
 	if err := tmpl.Execute(&buf, nil); err != nil {
 		t.Error(err)
 	}
-	if got := buf.String(); got != "  Hello\n  World" {
+	if got := buf.String(); got != "hello" {
 		t.Errorf("unexpected executed template content: %s", got)
 	}
 }

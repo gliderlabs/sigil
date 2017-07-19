@@ -7,6 +7,7 @@ import (
 )
 
 func TestSubstr(t *testing.T) {
+	t.Parallel()
 	for _, tt := range []strTest{
 		{[]interface{}{":", "abc"}, "abc", nil},
 		{[]interface{}{":2", "abc"}, "ab", nil},

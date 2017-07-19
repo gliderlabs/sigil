@@ -7,6 +7,7 @@ import (
 )
 
 func TestReplace(t *testing.T) {
+	t.Parallel()
 	for _, tt := range []strTest{
 		{[]interface{}{"abc", "ABC", "abcdef"}, "ABCdef", nil},
 		{[]interface{}{"b", "BB", "abcdefabc"}, "aBBcdefaBBc", nil},

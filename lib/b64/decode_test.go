@@ -7,6 +7,7 @@ import (
 )
 
 func TestDecode(t *testing.T) {
+	t.Parallel()
 	for _, tt := range []b64Test{
 		{[]interface{}{"SGVsbG8="}, "Hello", nil},
 		{[]interface{}{[]byte("SGVsbG8=")}, "Hello", nil},

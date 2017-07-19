@@ -7,6 +7,7 @@ import (
 )
 
 func TestTrim(t *testing.T) {
+	t.Parallel()
 	for _, tt := range []strTest{
 		{[]interface{}{"trimmed text"}, "trimmed text", nil},
 		{[]interface{}{"  untrimmed text "}, "untrimmed text", nil},

@@ -13,6 +13,7 @@ type b64Test struct {
 }
 
 func TestModuleFunc(t *testing.T) {
+	t.Parallel()
 	tmpl, err := template.New("").Funcs(template.FuncMap{
 		"b64": ModuleFunc,
 	}).Parse(`{{ "Hello" | b64.Encode }}`)

@@ -7,6 +7,7 @@ import (
 )
 
 func TestIndent(t *testing.T) {
+	t.Parallel()
 	for _, tt := range []fmtTest{
 		{[]interface{}{"\t", "Hello"}, "\tHello", nil},
 		{[]interface{}{"\t\t", "Hello\nWorld"}, "\t\tHello\n\t\tWorld", nil},

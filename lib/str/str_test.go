@@ -13,6 +13,7 @@ type strTest struct {
 }
 
 func TestModuleFunc(t *testing.T) {
+	t.Parallel()
 	tmpl, err := template.New("").Funcs(template.FuncMap{
 		"str": ModuleFunc,
 	}).Parse(`{{ "Hello" | str.Upper }}`)
