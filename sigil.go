@@ -40,6 +40,8 @@ func String(in interface{}) (string, string, bool) {
 	switch obj := in.(type) {
 	case string:
 		return obj, "", true
+	case []byte:
+		return string(obj), "", true
 	case NamedReader:
 		data, err := ioutil.ReadAll(obj)
 		if err != nil {
