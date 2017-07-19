@@ -2,12 +2,20 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	f "fmt"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/gliderlabs/sigil/pkg/sigil"
+	"github.com/spf13/afero"
+
+	"github.com/gliderlabs/sigil/lib/b64"
+	"github.com/gliderlabs/sigil/lib/fmt"
+	"github.com/gliderlabs/sigil/lib/fs"
+	"github.com/gliderlabs/sigil/lib/str"
+	"github.com/gliderlabs/sigil/lib/var"
 )
 
 var Version string
@@ -61,16 +69,23 @@ func main() {
 		if Version == "" {
 			Version = "master"
 		}
-		fmt.Println(Version)
+		f.Println(Version)
 		os.Exit(0)
 	}
 	p, err := NewProcessor()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		f.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	p.RegisterFuncs(template.FuncMap{
+		"b64": b64.ModuleFunc,
+		"fmt": fmt.ModuleFunc,
+		"fs":  fs.ModuleFunc(afero.NewOsFs()),
+		"str": str.ModuleFunc,
+		"var": var_.ModuleFunc,
+	})
 	if err := p.Execute(os.Stdout, ParseVars()); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		f.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

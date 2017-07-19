@@ -20,6 +20,9 @@ type Processor struct {
 }
 
 func (p *Processor) RegisterFuncs(f template.FuncMap) {
+	if p.funcMap == nil {
+		p.funcMap = make(template.FuncMap)
+	}
 	for k, v := range f {
 		p.funcMap[k] = v
 	}
