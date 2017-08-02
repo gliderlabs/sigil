@@ -19,6 +19,7 @@ import (
 	"github.com/dustin/go-jsonpointer"
 	"github.com/flynn/go-shlex"
 	"github.com/gliderlabs/sigil"
+	vaultClient "github.com/hashicorp/vault/api"
 	"github.com/jmespath/go-jmespath"
 	"gopkg.in/yaml.v2"
 )
@@ -55,6 +56,7 @@ func init() {
 		// structured data
 		"pointer":  Pointer,
 		"json":     Json,
+		"secret":   Secret,
 		"jmespath": JmesPath,
 		"tojson":   ToJson,
 		"yaml":     Yaml,
@@ -68,6 +70,55 @@ func init() {
 		"split":    Split,
 		"splitkv":  SplitKv,
 	})
+}
+func Secret(in interface{}, key interface{}, defaulter ...interface{}) (interface{}, error) {
+	config := vaultClient.DefaultConfig()
+	config.ReadEnvironment()
+	//var err error
+	v, err := vaultClient.NewClient(config)
+	if err != nil {
+		fmt.Printf("Unable to authenticate with vault %s", err)
+	}
+	vault := v.Logical()
+	fmt.Printf("in is %s, defaulter is %s \n", in, defaulter)
+	var defaultValue string
+	if len(defaulter) > 2 {
+		return "", fmt.Errorf("Too many arguments. should be secretPath [defaultValue]")
+	}
+	if len(defaulter) == 1 {
+		var ok bool
+		defaultValue, ok = defaulter[0].(string)
+		if !ok {
+			return "", fmt.Errorf("Default Value should be a string ")
+		}
+	}
+	key_, _, ok := sigil.String(key)
+	if !ok {
+		return "", fmt.Errorf("key %s should be a string ", key)
+	}
+	var path string
+	//var ok boolI//
+	if path, ok = in.(string); !ok {
+		return "", fmt.Errorf("path should be a string ")
+	}
+	secret, err := vault.Read(path)
+	if err != nil {
+		return "", fmt.Errorf("Cannot read secret at path %s: %s", path, err)
+	}
+	var value string
+	var val interface{}
+	if val, ok = secret.Data[key_]; !ok {
+		if defaultValue == "" {
+			return "", fmt.Errorf("No such key %s at path %s", key, path)
+		}
+		return defaultValue, nil
+	}
+	if value, ok = val.(string); !ok {
+		return "", fmt.Errorf("value at key %s is not a string", key)
+	}
+	return value, nil
+	//fmt.Printf("Iasdfasd %s \n", defaultValue)
+
 }
 
 func Shell(in interface{}) (interface{}, error) {
