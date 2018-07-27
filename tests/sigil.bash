@@ -51,9 +51,24 @@ T_capitalize() {
   [[ "$result" == "hello Jeff" ]]
 }
 
-T_exists() {
+T_exists_exist_relative() {
   result=$(echo '{{exists "Makefile"}}' | $SIGIL)
   [[ "$result" == "true" ]]
+}
+
+T_exists_exist_full() {
+  result=$(echo "{{exists \"$(pwd)/Makefile\"}}" | $SIGIL)
+  [[ "$result" == "true" ]]
+}
+
+T_exists_notexist_relative() {
+  result=$(echo '{{exists "FileNotExist"}}' | $SIGIL)
+  [[ "$result" == "false" ]]
+}
+
+T_exists_notexist_full() {
+  result=$(echo "{{exists \"$(pwd)/FileNotExist\"}}" | $SIGIL)
+  [[ "$result" == "false" ]]
 }
 
 T_XXX() {
