@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - run:
+          command: |
+            make deps
+            docker run --rm gliderlabs/glu | tar xC /home/ubuntu/bin
+            glu circleci
+            glu container up
+            glu build linux,darwin ./cmd
+      - run: make test
+      - run:
+          command: |
+            if [[ "$CIRCLE_BRANCH" == "release" ]]; then
+              make release
+            fi
