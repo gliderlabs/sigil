@@ -9,6 +9,7 @@ jobs:
           command: |
             set -x
             make deps
+            echo $HOME
             mkdir -p /home/ubuntu/bin
             docker run --rm gliderlabs/glu | tar xC /home/ubuntu/bin
             glu circleci
