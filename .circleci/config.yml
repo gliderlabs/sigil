@@ -10,8 +10,7 @@ jobs:
             set -x
             make deps
             echo $HOME
-            mkdir -p /home/ubuntu/bin
-            docker run --rm gliderlabs/glu | tar xC /home/ubuntu/bin
+            docker run --rm gliderlabs/glu | tar xC /home/circleci/bin
             glu circleci
             glu container up
             glu build linux,darwin ./cmd
