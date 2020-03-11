@@ -8,11 +8,6 @@ jobs:
       - run:
           command: |
             set -x
-            go version
-            sudo add-apt-repository ppa:longsleep/golang-backports
-            sudo apt update
-            sudo apt install golang-go
-            go version
             make deps
             docker run --rm gliderlabs/glu | tar xC /home/ubuntu/bin
             glu circleci
