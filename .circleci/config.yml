@@ -6,6 +6,7 @@ jobs:
       - checkout
       - run:
           command: |
+            set -x
             make deps
             docker run --rm gliderlabs/glu | tar xC /home/ubuntu/bin
             glu circleci
