@@ -10,6 +10,7 @@ jobs:
           command: |
             set -x
             echo $PWD
+            sudo apt-get install lxc
             make deps
             docker run --rm gliderlabs/glu | tar xC /home/circleci/bin
             glu circleci
