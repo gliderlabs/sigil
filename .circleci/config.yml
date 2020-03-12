@@ -7,6 +7,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: go version
+          command: |
+            go version
+            which go  
+      - run:
           name: install dependencies
           command: |
             sudo apt-get update
