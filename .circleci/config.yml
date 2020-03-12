@@ -7,19 +7,25 @@ jobs:
     steps:
       - checkout
       - run:
+          name: install dependencies
           command: |
             sudo apt-get update
             sudo apt-get install lxc lxc1
-      - run:
-          command: |
             make deps
+      - run:
+          name: build
+          command: |
             glu circleci
             glu container up
-            CIRCLECI=false glu build linux,darwin ./cmd
+            CIRCLECI=false make build
       - store_artifacts:
           path: /home/circleci/sigil/build
-      - run: make test
       - run:
+          name: test
+          command: |
+            make test
+      - run:
+          name: release
           command: |
             if [[ "$CIRCLE_BRANCH" == "release" ]]; then
               make release
