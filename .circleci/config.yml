@@ -7,10 +7,17 @@ jobs:
     steps:
       - checkout
       - run:
+          name: update go
+          command: |
+            curl --silent https://dl.google.com/go/go1.13.8.linux-amd64.tar.gz -o /tmp/go1.13.8.linux-amd64.tar.gz
+            rm -rf /usr/local/go
+            sudo tar -C /usr/local -xzf /tmp/go1.13.8.linux-amd64.tar.gz
+      - run:
           name: go version
           command: |
             go version
-            which go  
+            which go
+            echo $PATH
       - run:
           name: install dependencies
           command: |
