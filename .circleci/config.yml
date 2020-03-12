@@ -13,7 +13,6 @@ jobs:
       - run:
           command: |
             make deps
-            docker run --rm gliderlabs/glu | tar xC /home/circleci/bin
             glu circleci
             glu container up
             CIRCLECI=false glu build linux,darwin ./cmd
