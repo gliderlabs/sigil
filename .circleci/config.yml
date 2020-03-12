@@ -8,8 +8,8 @@ jobs:
       - run:
           command: |
             set -x
+            echo $PWD
             make deps
-            echo $HOME
             docker run --rm gliderlabs/glu | tar xC /home/circleci/bin
             glu circleci
             glu container up
