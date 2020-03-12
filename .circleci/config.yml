@@ -12,12 +12,13 @@ jobs:
             sudo apt-get install lxc lxc1
       - run:
           command: |
-            set -x
             make deps
             docker run --rm gliderlabs/glu | tar xC /home/circleci/bin
             glu circleci
             glu container up
             CIRCLECI=false glu build linux,darwin ./cmd
+      - store_artifacts:
+          path: /home/circleci/sigil/build
       - run: make test
       - run:
           command: |
