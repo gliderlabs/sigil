@@ -112,6 +112,16 @@ T_httpget() {
 	[[ "$result" == "https://httpbin.org/get" ]]
 }
 
+T_avail() {
+  result="$($SIGIL -i 'hello {{ if (avail "name" .) }}{{ .name }}{{ else }}you{{ end }}' name=packer)"
+  [[ "$result" == "{{ hello packer }}" ]]
+}
+
+T_avail_missing() {
+  result="$($SIGIL -i 'hello {{ if (avail "name" .) }}{{ .name }}{{ else }}you{{ end }}')"
+  [[ "$result" == "{{ hello you }}" ]]
+}
+
 T_custom_delim() {
   result="$(SIGIL_DELIMS={{{,}}} $SIGIL -i '{{ hello {{{ $name }}} }}' name=packer)"
 	[[ "$result" == "{{ hello packer }}" ]]

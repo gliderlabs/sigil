@@ -53,6 +53,7 @@ func init() {
 		"sh":      Shell,
 		"httpget": HttpGet,
 		// structured data
+		"avail":    Avail,
 		"pointer":  Pointer,
 		"json":     Json,
 		"jmespath": JmesPath,
@@ -590,4 +591,15 @@ func Drop(item interface{}, items []interface{}) ([]interface{}, error) {
 		}
 	}
 	return out, nil
+}
+
+func Avail(name string, data interface{}) bool {
+	v := reflect.ValueOf(data)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return false
+	}
+	return v.FieldByName(name).IsValid()
 }
