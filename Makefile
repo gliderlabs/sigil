@@ -14,8 +14,9 @@ ARCHITECTURE = amd64
 
 build:
 	glu build darwin,linux ./cmd
-	ls -lah .
-	ls -lah build
+ifdef CIRCLECI
+	sudo chown -R circleci:circleci build
+endif
 	$(MAKE) deb
 	$(MAKE) rpm
 
