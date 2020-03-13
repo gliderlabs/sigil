@@ -19,10 +19,14 @@ jobs:
             which go
             echo $PATH
       - run:
-          name: install dependencies
+          name: install system dependencies
           command: |
             sudo apt-get update
-            sudo apt-get install lxc lxc1
+            sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get install -qq -y lxc lxc1 gcc git build-essential ruby-dev ruby1.9.1 rpm
+            sudo gem install fpm --no-ri --no-rdoc
+      - run:
+          name: install code dependencies
+          command: |
             make deps
       - run:
           name: build
