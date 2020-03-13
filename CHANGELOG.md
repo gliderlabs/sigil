@@ -6,11 +6,30 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add [jmespath](http://jmespath.org) function
-- Add base64enc and base64dec functions
-
 ### Removed
 
 ### Changed
 
-[unreleased]: https://github.com/gliderlabs/glidergun/compare/v0.1.0...HEAD
+## [v0.5.0] - 2020-03-13
+### Fixed
+
+- #30: @lalyos Fix tojson
+- #19: @stormcat24 Use correct protocol for download url
+- #24: @mozamimy Fix a typo in SplitKv function
+- #39: @josegonzalez Fix sigil installation instructions
+- #46: @uphy `exists` function never returns false on full path
+
+### Added
+
+- #28: @lalyos Add [jmespath](http://jmespath.org) function
+- #21: @lalyos Add base64enc and base64dec functions
+- #16: @lalyos Add substring function
+- #13: @lalyos Make go templating left and right delimiter customizable.
+
+### Changed
+
+- @josegonzalez Upgrade to circleci 2.1
+- @josegonzalez Upgrade to golang 1.13.8
+
+[unreleased]: https://github.com/gliderlabs/registrator/compare/v0.5.0...HEAD
+[v0.5.0]: https://github.com/gliderlabs/registrator/compare/v0.5.0...v0.4.0
