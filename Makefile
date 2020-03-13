@@ -12,6 +12,8 @@ endef
 REPO_NAME ?= gliderlabs/sigil
 ARCHITECTURE = amd64
 
+export DESCRIPTION
+
 build:
 	glu build darwin,linux ./cmd
 ifdef CIRCLECI
