@@ -35,6 +35,11 @@ deps:
 
 release:
 	glu release v$(VERSION)
+	package_cloud push "dokku/dokku/ubuntu/xenial" build/deb/$(subst /,_,$(REPO_NAME))_$(VERSION)_amd64.deb
+	package_cloud push "dokku/dokku/ubuntu/bionic" build/deb/$(subst /,_,$(REPO_NAME))_$(VERSION)_amd64.deb
+	package_cloud push "dokku/dokku/debian/buster" build/deb/$(subst /,_,$(REPO_NAME))_$(VERSION)_amd64.deb
+	package_cloud push "dokku/dokku/debian/stretch" build/deb/$(subst /,_,$(REPO_NAME))_$(VERSION)_amd64.deb
+	package_cloud push "dokku/dokku/el/7" build/rpm/$(subst /,-,$(REPO_NAME))-$(VERSION)-1.x86_64.rpm
 
 clean:
 	rm -rf build release
