@@ -2,23 +2,25 @@ package builtin
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"reflect"
 	"strconv"
-	"os/exec"
-	"net/http"
 	"strings"
 	"text/template"
 
 	"github.com/dustin/go-jsonpointer"
-	"github.com/gliderlabs/sigil"
-	"gopkg.in/yaml.v2"
 	"github.com/flynn/go-shlex"
+	"github.com/gliderlabs/sigil"
+	"github.com/jmespath/go-jmespath"
+	"gopkg.in/yaml.v2"
 )
 
 func init() {
@@ -37,30 +39,34 @@ func init() {
 		"match":      Match,
 		"render":     Render,
 		"stdin":      Stdin,
+		"substr":     Substring,
+		"base64enc":  Base64Encode,
+		"base64dec":  Base64Decode,
 		// filesystem
 		"file":   File,
 		"exists": Exists,
 		"dir":    Dir,
 		"dirs":   Dirs,
 		"files":  Files,
-		"text": Text,
+		"text":   Text,
 		// external
-		"sh": Shell,
+		"sh":      Shell,
 		"httpget": HttpGet,
 		// structured data
-		"pointer": Pointer,
-		"json":    Json,
-		"tojson":  ToJson,
-		"yaml":    Yaml,
-		"toyaml":  ToYaml,
-		"uniq":    Uniq,
-		"drop":    Drop,
-		"append":  Append,
-		"seq":     Seq,
-		"join":    Join,
-		"joinkv":  JoinKv,
-		"split":   Split,
-		"splitkv": SplitKv,
+		"pointer":  Pointer,
+		"json":     Json,
+		"jmespath": JmesPath,
+		"tojson":   ToJson,
+		"yaml":     Yaml,
+		"toyaml":   ToYaml,
+		"uniq":     Uniq,
+		"drop":     Drop,
+		"append":   Append,
+		"seq":      Seq,
+		"join":     Join,
+		"joinkv":   JoinKv,
+		"split":    Split,
+		"splitkv":  SplitKv,
 	})
 }
 
@@ -93,9 +99,8 @@ func HttpGet(in interface{}) (interface{}, error) {
 	if err != nil {
 		return "", err
 	}
-	return sigil.NamedReader{resp.Body, "<"+in_+">"}, nil
+	return sigil.NamedReader{resp.Body, "<" + in_ + ">"}, nil
 }
-
 
 func JoinKv(sep string, in interface{}) ([]interface{}, error) {
 	m, ok := in.(map[string]interface{})
@@ -118,7 +123,7 @@ func SplitKv(sep string, in []interface{}) (interface{}, error) {
 	for i := range in {
 		v, ok := in[i].(string)
 		if !ok {
-			return nil, fmt.Errorf("joinkv must be given a string map of strings")
+			return nil, fmt.Errorf("splitkv must be given a string map of strings")
 		}
 		parts := strings.SplitN(v, sep, 2)
 		if len(parts) == 2 {
@@ -184,6 +189,23 @@ func Split(delim string, in interface{}) ([]interface{}, error) {
 		elements = append(elements, v)
 	}
 	return elements, nil
+}
+
+func Substring(slice string, in interface{}) (interface{}, error) {
+	in_, _, ok := sigil.String(in)
+	if !ok {
+		return nil, fmt.Errorf("substr must be given a string")
+	}
+	s := strings.Split(slice, ":")
+	start, err := strconv.Atoi(s[0])
+	if err != nil {
+		start = 0
+	}
+	end, err := strconv.Atoi(s[1])
+	if err != nil {
+		return nil, fmt.Errorf("substr needs slice expression as 'start:end' ")
+	}
+	return in_[start:end], nil
 }
 
 func Capitalize(in interface{}) (interface{}, error) {
@@ -259,6 +281,26 @@ func Text(file interface{}) (interface{}, error) {
 	return string(f), nil
 }
 
+func Base64Encode(file interface{}) (interface{}, error) {
+	f, err := read(file)
+	if err != nil {
+		return nil, err
+	}
+	return base64.StdEncoding.EncodeToString(f), nil
+}
+
+func Base64Decode(file interface{}) (interface{}, error) {
+	f, err := read(file)
+	if err != nil {
+		return nil, err
+	}
+	decoded, err := base64.StdEncoding.DecodeString(string(f))
+	if err != nil {
+		return nil, err
+	}
+	return string(decoded), nil
+}
+
 func Json(file interface{}) (interface{}, error) {
 	var obj interface{}
 	f, err := read(file)
@@ -272,8 +314,31 @@ func Json(file interface{}) (interface{}, error) {
 	return obj, nil
 }
 
+func convert(v interface{}) interface{} {
+	switch t := v.(type) {
+	case map[interface{}]interface{}:
+		return convertMap(t)
+	}
+	return v
+}
+
+func convertMap(m map[interface{}]interface{}) map[string]interface{} {
+	m2 := make(map[string]interface{})
+	for k, v := range m {
+		switch key := k.(type) {
+		case string:
+			m2[key] = convert(v)
+
+		default:
+			s := k.(string)
+			m2[s] = convert(v)
+		}
+	}
+	return m2
+}
+
 func ToJson(obj interface{}) (interface{}, error) {
-	data, err := json.Marshal(obj)
+	data, err := json.Marshal(convert(obj))
 	if err != nil {
 		return nil, err
 	}
@@ -316,6 +381,20 @@ func Pointer(path string, in interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("pointer needs a map type")
 	}
 	return jsonpointer.Get(m, path), nil
+}
+
+func JmesPath(path string, in interface{}) (interface{}, error) {
+	precompiled, err := jmespath.Compile(path)
+	if err != nil {
+		return nil, fmt.Errorf("JmesPath compileerror: %v", err)
+	}
+
+	result, err := precompiled.Search(in)
+	if err != nil {
+		return nil, fmt.Errorf("JmesPath search error: %v", err)
+	}
+
+	return result, nil
 }
 
 func Render(args ...interface{}) (interface{}, error) {

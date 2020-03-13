@@ -16,20 +16,18 @@ import (
 var (
 	TemplatePath    []string
 	PosixPreprocess bool
-	leftDelim       string
-	rightDelim      string
 )
 
+var leftDelim = "{{"
+var rightDelim = "}}"
 var fnMap = template.FuncMap{}
 
 func init() {
-	leftDelim = os.Getenv("SIGIL_LEFT_DELIM")
-	if leftDelim == "" {
-		leftDelim = "{{"
-	}
-	rightDelim = os.Getenv("SIGIL_RIGHT_DELIM")
-	if rightDelim == "" {
-		rightDelim = "}}"
+	delims := os.Getenv("SIGIL_DELIMS")
+	if delims != "" {
+		d := strings.Split(delims, ",")
+		leftDelim = d[0]
+		rightDelim = d[1]
 	}
 }
 
@@ -72,17 +70,27 @@ func PopPath() {
 
 func LookPath(file string) (string, error) {
 	if strings.HasPrefix(file, "/") {
-		return file, nil
-	}
-	cwd, _ := os.Getwd()
-	search := append([]string{cwd}, TemplatePath...)
-	for _, path := range search {
-		filepath := filepath.Join(path, file)
-		if _, err := os.Stat(filepath); err == nil {
-			return filepath, nil
+		if fileExists(file) {
+			return file, nil
+		}
+	} else {
+		cwd, _ := os.Getwd()
+		search := append([]string{cwd}, TemplatePath...)
+		for _, path := range search {
+			filepath := filepath.Join(path, file)
+			if fileExists(filepath) {
+				return filepath, nil
+			}
 		}
 	}
 	return "", fmt.Errorf("Not found in path: %s %v", file, TemplatePath)
+}
+
+func fileExists(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 func restoreEnv(env []string) {
