@@ -13,18 +13,19 @@ All notable changes to this project will be documented in this file.
 ## [v0.5.0] - 2020-03-13
 ### Fixed
 
-- #30: @lalyos Fix tojson
 - #19: @stormcat24 Use correct protocol for download url
 - #24: @mozamimy Fix a typo in SplitKv function
+- #30: @lalyos Fix tojson
 - #39: @josegonzalez Fix sigil installation instructions
 - #46: @uphy `exists` function never returns false on full path
 
 ### Added
 
-- #28: @lalyos Add [jmespath](http://jmespath.org) function
-- #21: @lalyos Add base64enc and base64dec functions
-- #16: @lalyos Add substring function
 - #13: @lalyos Make go templating left and right delimiter customizable.
+- #16: @lalyos Add substring function
+- #21: @lalyos Add base64enc and base64dec functions
+- #28: @lalyos Add [jmespath](http://jmespath.org) function
+- #52: @josegonzalez Release packages in CI
 
 ### Changed
 
