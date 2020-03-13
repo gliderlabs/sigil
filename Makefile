@@ -14,6 +14,8 @@ ARCHITECTURE = amd64
 
 build:
 	glu build darwin,linux ./cmd
+	ls -lah .
+	ls -lah build
 	$(MAKE) deb
 	$(MAKE) rpm
 
