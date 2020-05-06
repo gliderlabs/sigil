@@ -10,6 +10,12 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+## [v0.6.0] - 2020-05-06
+
+### Added
+
+- #53: @josegonzalez Release packages for Focal Fossa
+
 ## [v0.5.0] - 2020-03-13
 ### Fixed
 
@@ -32,5 +38,6 @@ All notable changes to this project will be documented in this file.
 - @josegonzalez Upgrade to circleci 2.1
 - @josegonzalez Upgrade to golang 1.13.8
 
-[unreleased]: https://github.com/gliderlabs/registrator/compare/v0.5.0...HEAD
+[unreleased]: https://github.com/gliderlabs/registrator/compare/v0.6.0...HEAD
+[v0.6.0]: https://github.com/gliderlabs/registrator/compare/v0.6.0...v0.5.0
 [v0.5.0]: https://github.com/gliderlabs/registrator/compare/v0.5.0...v0.4.0

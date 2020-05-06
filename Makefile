@@ -1,7 +1,7 @@
 NAME=sigil
 ARCH=$(shell uname -m)
 ORG=gliderlabs
-VERSION=0.5.0
+VERSION=0.6.0
 define DESCRIPTION
 Standalone string interpolator and template processor
 Sigil is a command line tool for template processing
