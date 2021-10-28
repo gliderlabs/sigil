@@ -22,6 +22,3 @@ validation/*
 
 # .env files
 .env*
-
-build
-site
