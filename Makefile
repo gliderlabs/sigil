@@ -201,6 +201,7 @@ validate:
 	sha1sum build/deb/$(NAME)_$(VERSION)_amd64.deb
 	sha1sum build/deb/$(NAME)_$(VERSION)_armhf.deb
 	sha1sum build/rpm/$(NAME)-$(VERSION)-1.x86_64.rpm
+	go get -u github.com/progrium/basht/...
 	basht tests/*.bash
 
 prebuild:
