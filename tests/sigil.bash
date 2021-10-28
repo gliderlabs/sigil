@@ -1,5 +1,5 @@
 GOOS=$(go env GOOS)
-export SIGIL="${SIGIL:-build/${GOOS^}/sigil}"
+export SIGIL="${SIGIL:-build/${GOOS^}/sigil}-amd64"
 
 T_posix_var() {
   result=$(echo 'Hello, $name' | $SIGIL -p name=Jeff)
