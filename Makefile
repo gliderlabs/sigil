@@ -5,9 +5,10 @@ MAINTAINER_NAME = Jose Diaz-Gonzalez
 REPOSITORY = sigil
 HARDWARE = $(shell uname -m)
 SYSTEM_NAME  = $(shell uname -s | tr '[:upper:]' '[:lower:]')
-BASE_VERSION ?= 0.7.0
+BASE_VERSION ?= 0.7.1
 IMAGE_NAME ?= $(MAINTAINER)/$(REPOSITORY)
 PACKAGECLOUD_REPOSITORY ?= dokku/dokku-betafish
+BINARY_NAME = sigil
 
 ifeq ($(CI_BRANCH),release)
 	VERSION ?= $(BASE_VERSION)
@@ -101,7 +102,7 @@ build/deb/$(NAME)_$(VERSION)_amd64.deb: build/linux/$(NAME)-amd64
 		--vendor "" \
 		--version $(VERSION) \
 		--verbose \
-		build/linux/$(NAME)-amd64=/usr/bin/$(NAME) \
+		build/linux/$(NAME)-amd64=/usr/bin/$(BINARY_NAME) \
 		LICENSE=/usr/share/doc/$(NAME)/copyright
 
 build/deb/$(NAME)_$(VERSION)_armhf.deb: build/linux/$(NAME)-armhf
@@ -121,7 +122,7 @@ build/deb/$(NAME)_$(VERSION)_armhf.deb: build/linux/$(NAME)-armhf
 		--vendor "" \
 		--version $(VERSION) \
 		--verbose \
-		build/linux/$(NAME)-armhf=/usr/bin/$(NAME) \
+		build/linux/$(NAME)-armhf=/usr/bin/$(BINARY_NAME) \
 		LICENSE=/usr/share/doc/$(NAME)/copyright
 
 build/rpm/$(NAME)-$(VERSION)-1.x86_64.rpm: build/linux/$(NAME)-amd64
@@ -142,7 +143,7 @@ build/rpm/$(NAME)-$(VERSION)-1.x86_64.rpm: build/linux/$(NAME)-amd64
 		--vendor "" \
 		--version $(VERSION) \
 		--verbose \
-		build/linux/$(NAME)-amd64=/usr/bin/$(NAME) \
+		build/linux/$(NAME)-amd64=/usr/bin/$(BINARY_NAME) \
 		LICENSE=/usr/share/doc/$(NAME)/copyright
 
 clean:

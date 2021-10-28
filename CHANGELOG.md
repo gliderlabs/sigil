@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [v0.7.1](https://github.com/gliderlabs/registrator/compare/v0.7.0...v0.7.1) - 2020-10-28
+
+### Fixed
+
+- #60 @josegonzalez Ensure binary name in package is sigil
+
 ## [v0.7.0](https://github.com/gliderlabs/registrator/compare/v0.6.0...v0.7.0) - 2020-10-28
 
 ### Fixed
