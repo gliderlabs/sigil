@@ -18,7 +18,7 @@ for any text processing.
 ## Getting Sigil
 
 ```shell
-curl -L "https://github.com/gliderlabs/sigil/releases/download/v0.6.0/gliderlabs-sigil_0.6.0_$(uname -sm|tr \  _).tgz" \
+curl -L "https://github.com/gliderlabs/sigil/releases/download/v0.7.0/gliderlabs-sigil_0.7.0_$(uname -sm|tr \  _).tgz" \
     | tar -zxC /usr/local/bin
 ```
 
