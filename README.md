@@ -18,7 +18,7 @@ for any text processing.
 ## Getting Sigil
 
 ```shell
-curl -L "https://github.com/gliderlabs/sigil/releases/download/v0.6.0/sigil_0.6.0_$(uname -sm|tr \  _).tgz" \
+curl -L "https://github.com/gliderlabs/sigil/releases/download/v0.7.0/gliderlabs-sigil_0.7.0_$(uname -sm|tr \  _).tgz" \
     | tar -zxC /usr/local/bin
 ```
 
@@ -64,7 +64,7 @@ Sometimes you want to use sigil to generate text, which uses golang templating i
 For example if you want to generate [packer](https://www.packer.io/docs/) configuration
 your template might contain a lot of `{{` and `}}`.
 
-Intead of replacing all `{{` with `{{“{{”}}`, you can change the delimiters,
+Instead of replacing all `{{` with `{{“{{”}}`, you can change the delimiters,
 by setting the `SIGIL_DELIMS` environment variable. It is the left and right
 delimiter strings, separated by a coma.
 
