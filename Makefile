@@ -112,7 +112,7 @@ build/deb/$(NAME)_$(VERSION)_amd64.deb: build/linux/$(NAME)-amd64
 		build/linux/$(NAME)-amd64=/usr/bin/$(BINARY_NAME) \
 		LICENSE=/usr/share/doc/$(NAME)/copyright
 
-build/deb/$(NAME)_$(VERSION)_arm64.deb: build/linux/$(NAME)-armhf
+build/deb/$(NAME)_$(VERSION)_arm64.deb: build/linux/$(NAME)-arm64
 	export SOURCE_DATE_EPOCH=$(shell git log -1 --format=%ct) \
 		&& mkdir -p build/deb \
 		&& fpm \
