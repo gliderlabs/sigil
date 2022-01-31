@@ -1,17 +1,32 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [v0.8.0](https://github.com/gliderlabs/registrator/compare/v0.7.1...v0.8.0) - 2022-01-31
+
+### Added
+
+- #66: @josegonzalez Add support for arm64
+
+### Fixed
+
+- #67: @josegonzalez Add missing jq dependency to build environment
+
+### Changed
+
+- #62: @dependabot chore(deps): bump golang from 1.17.2-buster to 1.17.3-buster
+- #65: @dependabot chore(deps): bump golang from 1.17.3-buster to 1.17.6-buster
+
 ## [v0.7.1](https://github.com/gliderlabs/registrator/compare/v0.7.0...v0.7.1) - 2020-10-28
 
 ### Fixed
 
-- #60 @josegonzalez Ensure binary name in package is sigil
+- #60: @josegonzalez Ensure binary name in package is sigil
 
 ## [v0.7.0](https://github.com/gliderlabs/registrator/compare/v0.6.0...v0.7.0) - 2020-10-28
 
 ### Fixed
 
-- #56 @0xflotus Fix typo in readme
+- #56: @0xflotus Fix typo in readme
 
 ### Added
 
