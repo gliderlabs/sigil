@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [v0.8.1](https://github.com/gliderlabs/registrator/compare/v0.8.0...v0.8.1) - 2022-03-05
+
+#### Added
+
+- #70: RyanGaudion Add Raspbian Bullseye
+
+#### Changed
+
+- #69: @dependabot chore(deps): bump golang from 1.17.6-buster to 1.17.7-buster
+
 ## [v0.8.0](https://github.com/gliderlabs/registrator/compare/v0.7.1...v0.8.0) - 2022-01-31
 
 ### Added
