@@ -6,8 +6,6 @@ github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad h1:Qk76DOWdOp+GlyDKB
 github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad/go.mod h1:mPKfmRa823oBIgl2r20LeMSpTAteW5j7FLkc0vjmzyQ=
 github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 h1:BHsljHzVlRcyQhjrss6TZTdY2VfCqZPbv5k3iBFa2ZQ=
 github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568/go.mod h1:xEzjJPgXI435gkrCt3MPfRiAkVrwSbHsst4LCFVfpJc=
-github.com/gliderlabs/sigil v0.6.0 h1:nrkh9J1/izJtWuOcV9C+cLeNVYcqWCMCeq+MIIdXDmQ=
-github.com/gliderlabs/sigil v0.6.0/go.mod h1:1h7H4biRwXmWY82OZkXIQp8WTwxX5/TwJPwVNKT1J2E=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
