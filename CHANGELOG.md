@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [v0.9.0](https://github.com/gliderlabs/registrator/compare/v0.8.1...v0.9.0) - 2022-05-10
+
+#### Added
+
+- #74 @josegonzalez Publish armhf package to ubuntu/focal
+- #78 @josegonzalez Publish package for Ubuntu 22.04
+
+#### Changed
+
+- #73 @dependabot chore(deps): bump golang from 1.17.7-buster to 1.17.8-buster
+- #76 @dependabot chore(deps): bump golang from 1.17.8-buster to 1.18.1-buster
+- #77 @chibadaijiro Specify the full path in the module directive of go.mod.
+- #79 @josegonzalez Update go modules
+
 ## [v0.8.1](https://github.com/gliderlabs/registrator/compare/v0.8.0...v0.8.1) - 2022-03-05
 
 #### Added
