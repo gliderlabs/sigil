@@ -1,4 +1,4 @@
-FROM golang:1.18.2-buster
+FROM golang:1.18.5-buster
 
 RUN apt-get update \
     && apt install apt-transport-https build-essential curl gnupg2 jq lintian rpm rsync rubygems-integration ruby-dev ruby -qy \
