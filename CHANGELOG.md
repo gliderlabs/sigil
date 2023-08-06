@@ -1,14 +1,30 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [v0.10.0](https://github.com/gliderlabs/registrator/compare/v0.9.0...v0.10.0) - 2023-08-06
+
+### Added
+
+- #82 @josegonzalez Add support for raspbian/bullseye on arm64 architectures
+- #98 @Coffee2CodeNL: Add Bookworm Support
+
+### Changed
+
+- #81 @dependabot: chore(deps): bump golang from 1.18.1-buster to 1.18.2-buster
+- #83 @josegonzalez Publish arm64 packages for debian instead of raspbian
+- #94 @dependabot: chore(deps): bump golang from 1.18.2-buster to 1.20.1-buster
+- #95 @dependabot: chore(deps): bump golang from 1.20.1-buster to 1.20.4-buster
+- #96 @josegonzalez chore: update runner to use ubuntu 20.04
+- #97 @dependabot: chore(deps): bump golang from 1.20.4-buster to 1.20.5-buster
+
 ## [v0.9.0](https://github.com/gliderlabs/registrator/compare/v0.8.1...v0.9.0) - 2022-05-10
 
-#### Added
+### Added
 
 - #74 @josegonzalez Publish armhf package to ubuntu/focal
 - #78 @josegonzalez Publish package for Ubuntu 22.04
 
-#### Changed
+### Changed
 
 - #73 @dependabot chore(deps): bump golang from 1.17.7-buster to 1.17.8-buster
 - #76 @dependabot chore(deps): bump golang from 1.17.8-buster to 1.18.1-buster
@@ -17,11 +33,11 @@ All notable changes to this project will be documented in this file.
 
 ## [v0.8.1](https://github.com/gliderlabs/registrator/compare/v0.8.0...v0.8.1) - 2022-03-05
 
-#### Added
+### Added
 
 - #70: RyanGaudion Add Raspbian Bullseye
 
-#### Changed
+### Changed
 
 - #69: @dependabot chore(deps): bump golang from 1.17.6-buster to 1.17.7-buster
 
