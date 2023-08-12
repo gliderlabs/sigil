@@ -249,4 +249,5 @@ validate:
 	basht tests/*.bash
 
 prebuild:
-	true
+	git config --global --add safe.directory $(shell pwd)
+	git status
