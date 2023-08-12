@@ -5,7 +5,7 @@ MAINTAINER_NAME = Jose Diaz-Gonzalez
 REPOSITORY = sigil
 HARDWARE = $(shell uname -m)
 SYSTEM_NAME  = $(shell uname -s | tr '[:upper:]' '[:lower:]')
-BASE_VERSION ?= 0.10.0
+BASE_VERSION ?= 0.10.1
 IMAGE_NAME ?= $(MAINTAINER)/$(REPOSITORY)
 PACKAGECLOUD_REPOSITORY ?= dokku/dokku-betafish
 BINARY_NAME = sigil
@@ -249,4 +249,5 @@ validate:
 	basht tests/*.bash
 
 prebuild:
-	true
+	git config --global --add safe.directory $(shell pwd)
+	git status
