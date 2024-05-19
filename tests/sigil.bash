@@ -1,3 +1,4 @@
+# shellcheck disable=all
 GOOS=$(go env GOOS)
 export SIGIL="${SIGIL:-build/${GOOS}/gliderlabs-sigil}-amd64"
 
