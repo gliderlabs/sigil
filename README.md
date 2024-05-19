@@ -2,8 +2,11 @@
 
 Standalone string interpolator and template processor
 
+```shell
+echo '${name} is{{ range seq ${count:-3} }} cool{{ end }}!' | sigil -p name=Sigil
 ```
-$ echo '${name} is{{ range seq ${count:-3} }} cool{{ end }}!' | sigil -p name=Sigil
+
+```text
 Sigil is cool cool cool!
 ```
 
@@ -64,7 +67,7 @@ Instead of replacing all `{{` with `{{“{{”}}`, you can change the delimiters
 by setting the `SIGIL_DELIMS` environment variable. It is the left and right
 delimiter strings, separated by a coma.
 
-```
+```shell
 SIGIL_DELIMS={{{,}}}  sigil -i 'hello {{{ $name }}}' name=packer
 ```
 
@@ -104,4 +107,4 @@ documentation there.
 ## License
 
 BSD
-<img src="https://ga-beacon.appspot.com/UA-58928488-2/sigil/readme?pixel" />
+![beacon](https://ga-beacon.appspot.com/UA-58928488-2/sigil/readme?pixel "beacon")
