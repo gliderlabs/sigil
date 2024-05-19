@@ -34,6 +34,7 @@ jobs:
         id: repo-name
         run: |
           echo "REPOSITORY_NAME=$(echo "${{ github.repository }}" | cut -d '/' -f 2)" >> $GITHUB_OUTPUT
+          echo "REPOSITORY_SLUG=$(echo "${{ github.repository }}" | sed 's#/#-#')" >> $GITHUB_OUTPUT
 
       - name: Build binaries
         uses: crazy-max/ghaction-xgo@v3
@@ -80,11 +81,11 @@ jobs:
         run: |
           mkdir -p build/linux
 
-          cp dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-amd64 build/linux/${{ github.repository }}-amd64
-          cp dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-arm64 build/linux/${{ github.repository }}-arm64
+          cp dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-amd64 build/linux/${{ steps.repo-name.outputs.REPOSITORY_SLUG }}-amd64
+          cp dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-arm64 build/linux/${{ steps.repo-name.outputs.REPOSITORY_SLUG }}-arm64
 
-          bundle exec make build/deb/${{ github.repository }}_${{ github.ref_name }}_arm64.deb
-          bundle exec make build/deb/${{ github.repository }}_${{ github.ref_name }}_amd64.deb
+          bundle exec make build/deb/${{ steps.repo-name.outputs.REPOSITORY_SLUG }}_${{ github.ref_name }}_arm64.deb
+          bundle exec make build/deb/${{ steps.repo-name.outputs.REPOSITORY_SLUG }}_${{ github.ref_name }}_amd64.deb
           cp build/deb/*.deb dist/
         env:
           BUNDLE_GEMFILE: .github/Gemfile
