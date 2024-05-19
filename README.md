@@ -1,8 +1,6 @@
 # Sigil
 
-[![CircleCI](https://img.shields.io/circleci/project/gliderlabs/sigil/release.svg)](https://circleci.com/gh/gliderlabs/sigil)
 [![IRC Channel](https://img.shields.io/badge/irc-%23gliderlabs-blue.svg)](https://kiwiirc.com/client/irc.freenode.net/#gliderlabs)
-
 
 Standalone string interpolator and template processor
 
@@ -104,7 +102,6 @@ Here are a few examples:
 Lots more is possible with this template syntax. Sigil is based on Go's
 [text/template package](http://golang.org/pkg/text/template/). You can read full
 documentation there.
-
 
 ## License
 
