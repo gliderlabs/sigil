@@ -1,0 +1,109 @@
+---
+name: "tagged-release"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  attestations: write
+  id-token: write
+  contents: write
+
+jobs:
+  tagged-release:
+    name: tagged-release
+    runs-on: ubuntu-22.04
+    env:
+      CI_BRANCH: release
+      PACKAGECLOUD_REPOSITORY: dokku/dokku
+      VERSION: ${{ github.ref_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+
+      - name: Get Repository Name
+        id: repo-name
+        run: |
+          echo "REPOSITORY_NAME=$(echo "${{ github.repository }}" | cut -d '/' -f 2)" >> $GITHUB_OUTPUT
+
+      - name: Build binaries
+        uses: crazy-max/ghaction-xgo@v3
+        with:
+          xgo_version: latest
+          go_version: 1.21
+          dest: dist
+          prefix: ${{ steps.repo-name.outputs.REPOSITORY_NAME }}
+          targets: darwin/amd64,darwin/arm64,linux/arm64,linux/amd64
+          v: true
+          x: false
+          race: false
+          ldflags: -s -w -X main.Version=${{ github.ref_name }}
+          buildmode: default
+          trimpath: true
+
+      - name: Attest Build Provenance - darwin-amd64
+        uses: actions/attest-build-provenance@v1.1.2
+        with:
+          subject-path: "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-darwin-amd64"
+
+      - name: Attest Build Provenance - darwin-arm64
+        uses: actions/attest-build-provenance@v1.1.2
+        with:
+          subject-path: "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-darwin-arm64"
+
+      - name: Attest Build Provenance - linux-amd64
+        uses: actions/attest-build-provenance@v1.1.2
+        with:
+          subject-path: "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-amd64"
+
+      - name: Attest Build Provenance - linux-arm64
+        uses: actions/attest-build-provenance@v1.1.2
+        with:
+          subject-path: "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-arm64"
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1.176.0
+        with:
+          bundler-cache: true
+          working-directory: .github
+
+      - name: Build Debian Packages
+        run: |
+          mkdir -p build/linux
+
+          cp dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-amd64 build/linux/${{ github.repository }}-amd64
+          cp dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-arm64 build/linux/${{ github.repository }}-arm64
+
+          bundle exec make build/deb/${{ github.repository }}_${{ github.ref_name }}_arm64.deb
+          bundle exec make build/deb/${{ github.repository }}_${{ github.ref_name }}_amd64.deb
+          cp build/deb/*.deb dist/
+        env:
+          BUNDLE_GEMFILE: .github/Gemfile
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+
+      - name: Release to PackageCloud
+        run: bundle exec make release-packagecloud
+        env:
+          BUNDLE_GEMFILE: .github/Gemfile
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          make_latest: "true"

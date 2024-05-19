@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+
+ruby file: ".ruby-version"
+
+gem "fpm"
+gem "package_cloud"
