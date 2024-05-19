@@ -53,7 +53,7 @@ build: prebuild
 	@$(MAKE) build/deb/$(NAME)_$(VERSION)_arm64.deb
 
 build-docker-image:
-	docker build --rm -q -f Dockerfile.build -t $(IMAGE_NAME):build .
+	docker build --rm -q -f Dockerfile -t $(IMAGE_NAME):build .
 
 $(targets): %-in-docker: .env.docker
 	docker run \
