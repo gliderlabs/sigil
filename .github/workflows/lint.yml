@@ -1,0 +1,69 @@
+---
+name: "lint"
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+    branches:
+      - "*"
+  push:
+    branches:
+      - "main"
+
+jobs:
+  hadolint:
+    name: hadolint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+      - name: Run hadolint
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf
+
+  markdown-lint:
+    name: markdown-lint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+      - name: Run markdown-lint
+        uses: avto-dev/markdown-lint@04d43ee9191307b50935a753da3b775ab695eceb
+        with:
+          config: ".github/linters/.markdown-lint.yml"
+          args: "./README.md"
+
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+      - name: Run shellcheck
+        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38
+        env:
+          SHELLCHECK_OPTS: -s bash
+  shfmt:
+    name: shfmt
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+      - name: Run shfmt
+        uses: luizm/action-sh-checker@c6edb3de93e904488b413636d96c6a56e3ad671a
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+          SHFMT_OPTS: -l -d -i 2
+        with:
+          sh_checker_shellcheck_disable: true
+          sh_checker_comment: true
+
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@2576378a8e339169678f9939646ee3ee325e845c
+        with:
+          config_file: ".github/linters/.yamllint.yml"

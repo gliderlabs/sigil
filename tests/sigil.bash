@@ -1,3 +1,4 @@
+# shellcheck disable=all
 GOOS=$(go env GOOS)
 export SIGIL="${SIGIL:-build/${GOOS}/gliderlabs-sigil}-amd64"
 
@@ -17,7 +18,7 @@ T_posix_var_check() {
 }
 
 T_posix_var_check_unset() {
-  echo 'Hello, ${name:?}' | $SIGIL -p &> /dev/null
+  echo 'Hello, ${name:?}' | $SIGIL -p &>/dev/null
   [[ $? -ne 0 ]]
 }
 
@@ -87,52 +88,53 @@ T_splitkv_joinkv() {
 }
 
 T_json() {
-	result=$(echo '{"one": "two"}' | $SIGIL -i '{{ stdin | json | tojson }}')
-	[[ "$result" == "{\"one\":\"two\"}" ]]
+  result=$(echo '{"one": "two"}' | $SIGIL -i '{{ stdin | json | tojson }}')
+  [[ "$result" == "{\"one\":\"two\"}" ]]
 }
 
 T_json_deep() {
-	result=$(echo '{"foo": {"one": "two"}}' | $SIGIL -i '{{ stdin | json | tojson }}')
-	[[ "$result" == '{"foo":{"one":"two"}}' ]]
+  result=$(echo '{"foo": {"one": "two"}}' | $SIGIL -i '{{ stdin | json | tojson }}')
+  [[ "$result" == '{"foo":{"one":"two"}}' ]]
 }
 
 T_yaml() {
-	yaml="$(echo -e "one: two\nthree:\n- four\n- five")"
-	result="$(echo -e "$yaml" | $SIGIL -i '{{ stdin | yaml | toyaml }}')"
-	[[ "$result" == "$yaml" ]]
+  yaml="$(echo -e "one: two\nthree:\n- four\n- five")"
+  result="$(echo -e "$yaml" | $SIGIL -i '{{ stdin | yaml | toyaml }}')"
+  [[ "$result" == "$yaml" ]]
 }
 
 T_shell() {
   result="$($SIGIL -i '{{ sh "date +%m-%d-%Y" }}')"
-	[[ "$result" == "$(date +%m-%d-%Y)" ]]
+  [[ "$result" == "$(date +%m-%d-%Y)" ]]
 }
 
 T_httpget() {
   result="$($SIGIL -i '{{ httpget "https://httpbin.org/get" | json | pointer "/url" }}')"
-	[[ "$result" == "https://httpbin.org/get" ]]
+  [[ "$result" == "https://httpbin.org/get" ]]
 }
 
 T_custom_delim() {
   result="$(SIGIL_DELIMS={{{,}}} $SIGIL -i '{{ hello {{{ $name }}} }}' name=packer)"
-	[[ "$result" == "{{ hello packer }}" ]]
+  [[ "$result" == "{{ hello packer }}" ]]
 }
 
 T_substr() {
   result="$($SIGIL -i '{{ "abcdefgh" | substr "1:4" }}')"
-	[[ "$result" == "bcd" ]]
+  [[ "$result" == "bcd" ]]
 }
 T_substr_single_index() {
   result="$($SIGIL -i '{{ "abcdefgh" | substr ":4" }}')"
-	[[ "$result" == "abcd" ]]
+  [[ "$result" == "abcd" ]]
 }
 
 T_yamltojson() {
   result="$(printf 'joe:\n  age: 32\n  color: red' | $SIGIL -i '{{ stdin |  yaml | tojson }}')"
-    [[ "$result" == '{"joe":{"age":32,"color":"red"}}' ]]
+  [[ "$result" == '{"joe":{"age":32,"color":"red"}}' ]]
 }
 
 T_yamltojsondeep() {
-    result="$( $SIGIL -i '{{ stdin |  yaml | tojson }}' <<EOF
+  result="$(
+    $SIGIL -i '{{ stdin |  yaml | tojson }}' <<EOF
 a: Easy!
 b:
   c: 2
@@ -145,21 +147,21 @@ c:
   - two
   - tree
 EOF
-)"
-    [[ "$result" == '{"a":"Easy!","b":{"c":2,"d":[3,4]},"c":{"list":["one","two","tree"]}}' ]]
+  )"
+  [[ "$result" == '{"a":"Easy!","b":{"c":2,"d":[3,4]},"c":{"list":["one","two","tree"]}}' ]]
 }
 
 T_jmespath() {
   result="$(echo '[{"name":"bob","age":20},{"name":"jim","age":30},{"name":"joe","age":40}]' | $SIGIL -i '{{stdin | json | jmespath "[? age >= `30`].name | reverse(@)"  | join ","}}')"
-    [[ "$result" == 'joe,jim' ]]
+  [[ "$result" == 'joe,jim' ]]
 }
 
 T_base64enc() {
   result="$(echo 'happybirthday' | $SIGIL -i '{{ stdin | base64enc }}')"
-	[[ "$result" == "aGFwcHliaXJ0aGRheQo=" ]]
+  [[ "$result" == "aGFwcHliaXJ0aGRheQo=" ]]
 }
 
 T_base64dec() {
   result="$(echo 'aGFwcHliaXJ0aGRheQo=' | $SIGIL -i '{{ stdin | base64dec }}')"
-	[[ "$result" == "happybirthday" ]]
+  [[ "$result" == "happybirthday" ]]
 }
