@@ -1,6 +1,10 @@
 ---
 version: 2
 updates:
+  - package-ecosystem: "bundler"
+    directory: "/.github"
+    schedule:
+      interval: "daily"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
