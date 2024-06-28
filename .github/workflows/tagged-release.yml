@@ -72,7 +72,7 @@ jobs:
           subject-path: "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-arm64"
 
       - name: Setup Ruby
-        uses: ruby/setup-ruby@v1.177.1
+        uses: ruby/setup-ruby@v1.182.0
         with:
           bundler-cache: true
           working-directory: .github
