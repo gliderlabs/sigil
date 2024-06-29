@@ -40,3 +40,34 @@ jobs:
             rm .env.docker
             make .env.docker release-in-docker release-packagecloud-in-docker
           fi
+
+  binary-check:
+    name: binary-check
+    runs-on: ubuntu-22.04
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Repository Name
+        id: repo-name
+        run: |
+          echo "REPOSITORY_NAME=$(echo "${{ github.repository }}" | cut -d '/' -f 2)" >> $GITHUB_OUTPUT
+          echo "TARGET_ARCHITECTURE=$(dpkg --print-architecture)" >> $GITHUB_OUTPUT
+          echo "GO_VERSION=$(go mod edit -json | jq -r .Go)" >> $GITHUB_OUTPUT
+      - name: Build binaries
+        uses: crazy-max/ghaction-xgo@v3
+        with:
+          xgo_version: latest
+          go_version: "${{ steps.repo-name.outputs.GO_VERSION }}"
+          dest: dist
+          pkg: cmd
+          prefix: ${{ steps.repo-name.outputs.REPOSITORY_NAME }}
+          targets: linux/${{ steps.repo-name.outputs.TARGET_ARCHITECTURE }}
+          v: true
+          x: false
+          race: false
+          ldflags: -s -w -X main.Version=${{ github.ref_name }}
+          buildmode: default
+          trimpath: true
+      - name: Check version
+        run: |
+          "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-${{ steps.repo-name.outputs.TARGET_ARCHITECTURE }}" --version
