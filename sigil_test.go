@@ -1,7 +1,6 @@
 package sigil
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,7 +11,7 @@ func TestLookPath(t *testing.T) {
 		for _, relative := range []bool{true, false} {
 			for _, exists := range []bool{true, false} {
 				// setup
-				f, err := ioutil.TempFile(tmpDir, "sigiltest")
+				f, err := os.CreateTemp(tmpDir, "sigiltest")
 				if err != nil {
 					t.Error("failed to crate temporary file")
 					continue

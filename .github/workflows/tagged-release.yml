@@ -40,7 +40,7 @@ jobs:
         uses: crazy-max/ghaction-xgo@v3
         with:
           xgo_version: latest
-          go_version: 1.21
+          go_version: 1.22
           dest: dist
           prefix: ${{ steps.repo-name.outputs.REPOSITORY_NAME }}
           targets: darwin/amd64,darwin/arm64,linux/arm64,linux/amd64
