@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,7 +40,7 @@ func String(in interface{}) (string, string, bool) {
 	case string:
 		return obj, "", true
 	case NamedReader:
-		data, err := ioutil.ReadAll(obj)
+		data, err := io.ReadAll(obj)
 		if err != nil {
 			// TODO: better overall error/panic handling
 			panic(err)

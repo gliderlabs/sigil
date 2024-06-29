@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,7 +23,7 @@ var (
 
 func template() ([]byte, string, error) {
 	if *filename != "" {
-		data, err := ioutil.ReadFile(*filename)
+		data, err := os.ReadFile(*filename)
 		if err != nil {
 			return []byte{}, "", err
 		}
@@ -33,7 +33,7 @@ func template() ([]byte, string, error) {
 	if *inline != "" {
 		return []byte(*inline), "<inline>", nil
 	}
-	data, err := ioutil.ReadAll(os.Stdin)
+	data, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		return []byte{}, "", err
 	}

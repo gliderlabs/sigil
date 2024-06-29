@@ -1,6 +1,6 @@
 module github.com/gliderlabs/sigil
 
-go 1.18
+go 1.22
 
 require (
 	github.com/dustin/go-jsonpointer v0.0.0-20160814072949-ba0abeacc3dc

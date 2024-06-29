@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -251,7 +251,7 @@ func Trim(in interface{}) (interface{}, error) {
 func read(file interface{}) ([]byte, error) {
 	reader, ok := file.(sigil.NamedReader)
 	if ok {
-		return ioutil.ReadAll(reader)
+		return io.ReadAll(reader)
 	}
 	path, _, ok := sigil.String(file)
 	if !ok {
@@ -261,7 +261,7 @@ func read(file interface{}) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
-	data, err := ioutil.ReadFile(filepath)
+	data, err := os.ReadFile(filepath)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -437,7 +437,7 @@ func Include(filename string, args ...interface{}) (interface{}, error) {
 	if err != nil {
 		return "", err
 	}
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
@@ -497,7 +497,7 @@ func Dir(in interface{}) ([]interface{}, error) {
 		return nil, fmt.Errorf("dir must be given a string")
 	}
 	var files []interface{}
-	dir, err := ioutil.ReadDir(path)
+	dir, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
@@ -513,7 +513,7 @@ func Dirs(in interface{}) ([]interface{}, error) {
 		return nil, fmt.Errorf("dirs must be given a string")
 	}
 	var dirs []interface{}
-	dir, err := ioutil.ReadDir(path)
+	dir, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
@@ -531,7 +531,7 @@ func Files(in interface{}) ([]interface{}, error) {
 		return nil, fmt.Errorf("files must be given a string")
 	}
 	var files []interface{}
-	dir, err := ioutil.ReadDir(path)
+	dir, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
