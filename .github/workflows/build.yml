@@ -28,7 +28,7 @@ jobs:
       - run: make build-in-docker
       - run: make validate-in-docker
       - name: upload packages
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build
           path: build/**/*
