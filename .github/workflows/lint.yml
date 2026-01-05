@@ -49,7 +49,7 @@ jobs:
       - name: Clone
         uses: actions/checkout@v6
       - name: Run shfmt
-        uses: luizm/action-sh-checker@17bd25a6ee188d2b91f677060038f4ba37ba14b2
+        uses: luizm/action-sh-checker@883217215b11c1fabbf00eb1a9a041f62d74c744
         env:
           GITHUB_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
           SHFMT_OPTS: -l -d -i 2
