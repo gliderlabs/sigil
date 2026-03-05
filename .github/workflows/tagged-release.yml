@@ -38,7 +38,7 @@ jobs:
           echo "GO_VERSION=$(go mod edit -json | jq -r .Go)" >> $GITHUB_OUTPUT
 
       - name: Build binaries
-        uses: crazy-max/ghaction-xgo@v3
+        uses: crazy-max/ghaction-xgo@v4
         with:
           xgo_version: latest
           go_version: "${{ steps.repo-name.outputs.GO_VERSION }}"
