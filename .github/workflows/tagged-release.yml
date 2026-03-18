@@ -54,27 +54,16 @@ jobs:
           trimpath: true
 
       - name: Attest Build Provenance - darwin-amd64
-        uses: actions/attest-build-provenance@v4.1.0
+        uses: actions/attest-build-provenance@v4
         with:
-          subject-path: "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-darwin-amd64"
-
-      - name: Attest Build Provenance - darwin-arm64
-        uses: actions/attest-build-provenance@v4.1.0
-        with:
-          subject-path: "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-darwin-arm64"
-
-      - name: Attest Build Provenance - linux-amd64
-        uses: actions/attest-build-provenance@v4.1.0
-        with:
-          subject-path: "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-amd64"
-
-      - name: Attest Build Provenance - linux-arm64
-        uses: actions/attest-build-provenance@v4.1.0
-        with:
-          subject-path: "dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-arm64"
+          subject-path: |
+            dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-darwin-amd64
+            dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-darwin-arm64
+            dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-amd64
+            dist/${{ steps.repo-name.outputs.REPOSITORY_NAME }}-linux-arm64
 
       - name: Setup Ruby
-        uses: ruby/setup-ruby@v1.295.0
+        uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
           working-directory: .github
