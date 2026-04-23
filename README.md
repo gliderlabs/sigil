@@ -159,6 +159,7 @@ for functions available:
 Here are a few examples:
 
 * `{{ $variable | capitalize }}`
+* `{{ $variable | default "fallback" }}` - use fallback when variable is not provided or empty
 * `{{ include "file.tmpl" "var1=foo" "var2=bar" }}`
 * `{{ file "example.txt" | replace "old" "new" }}`
 * `{{ json "file.json" | pointer "/Widgets/0/Name" }}`

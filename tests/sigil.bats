@@ -339,6 +339,41 @@ EOF
   [[ "$status" -ne 0 ]]
 }
 
+@test "default with missing variable" {
+  result=$($SIGIL -i '{{ $x | default "fallback" }}')
+  [[ "$result" == "fallback" ]]
+}
+
+@test "default with empty variable" {
+  result=$($SIGIL -i '{{ $x | default "fallback" }}' x=)
+  [[ "$result" == "fallback" ]]
+}
+
+@test "default with provided variable" {
+  result=$($SIGIL -i '{{ $x | default "fallback" }}' x=hello)
+  [[ "$result" == "hello" ]]
+}
+
+@test "default with dot syntax for missing variable" {
+  result=$($SIGIL -i '{{ $.x | default "fallback" }}')
+  [[ "$result" == "fallback" ]]
+}
+
+@test "multiple missing variables with defaults" {
+  result=$($SIGIL -i '{{ $a | default "A" }}-{{ $b | default "B" }}')
+  [[ "$result" == "A-B" ]]
+}
+
+@test "default with mixed provided and missing variables" {
+  result=$($SIGIL -i '{{ $a | default "A" }}-{{ $b | default "B" }}' a=hello)
+  [[ "$result" == "hello-B" ]]
+}
+
+@test "range still works with default variable fix" {
+  result=$(echo 'Sigil is{{ range $i := seq 3 }} cool{{ end }}!' | $SIGIL)
+  [[ "$result" == "Sigil is cool cool cool!" ]]
+}
+
 @test "vars-file with in-place mode" {
   varsfile=$(mktemp)
   mv "$varsfile" "${varsfile}.json"
