@@ -87,6 +87,66 @@ retained.
 Note: `--in-place` requires the `-f` flag. It cannot be used with `-i` (inline)
 or stdin input.
 
+### Variables from files
+
+Use the `--vars-file` (or `-V`) flag to load variables from a file instead of
+passing them all as command-line arguments. The flag can be specified multiple
+times; files are merged in order, and CLI `key=value` arguments override any
+file-sourced variables.
+
+The file format is auto-detected by extension:
+
+* `.json` - parsed as a JSON object
+* `.yaml` / `.yml` - parsed as a YAML mapping
+* `.env` or any other extension - parsed as key=value lines
+
+#### JSON example (`vars.json`)
+
+```json
+{
+  "name": "Jeff",
+  "greeting": "Hello",
+  "port": 8080
+}
+```
+
+#### YAML example (`vars.yaml`)
+
+```yaml
+name: Jeff
+greeting: Hello
+port: 8080
+```
+
+#### Env example (`vars.env`)
+
+```shell
+# Database config
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME="my_database"
+export APP_ENV='production'
+```
+
+#### Usage
+
+```shell
+# JSON vars file
+sigil -f config.tmpl -V vars.json
+
+# YAML vars file
+sigil -f config.tmpl -V vars.yaml
+
+# env-style vars file
+sigil -f config.tmpl -V vars.env
+
+# Multiple files, later overrides earlier
+sigil -f config.tmpl -V defaults.yaml -V overrides.json
+
+# CLI args override file vars
+sigil -f config.tmpl -V vars.json name=override
+```
+
 ### Functions
 
 There are a number of builtin functions that can be used as modifiers,
