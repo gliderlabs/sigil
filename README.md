@@ -100,6 +100,36 @@ The file format is auto-detected by extension:
 * `.yaml` / `.yml` - parsed as a YAML mapping
 * `.env` or any other extension - parsed as key=value lines
 
+#### JSON example (`vars.json`)
+
+```json
+{
+  "name": "Jeff",
+  "greeting": "Hello",
+  "port": 8080
+}
+```
+
+#### YAML example (`vars.yaml`)
+
+```yaml
+name: Jeff
+greeting: Hello
+port: 8080
+```
+
+#### Env example (`vars.env`)
+
+```shell
+# Database config
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME="my_database"
+export APP_ENV='production'
+```
+
+#### Usage
+
 ```shell
 # JSON vars file
 sigil -f config.tmpl -V vars.json
@@ -116,13 +146,6 @@ sigil -f config.tmpl -V defaults.yaml -V overrides.json
 # CLI args override file vars
 sigil -f config.tmpl -V vars.json name=override
 ```
-
-The env-style format supports:
-
-* Comments starting with `#`
-* Empty lines (ignored)
-* Optional `export` prefix (e.g., `export KEY=value`)
-* Optional surrounding quotes on values (single or double)
 
 ### Functions
 
