@@ -168,7 +168,7 @@ T_base64dec() {
 
 T_inplace_basic() {
   tmpfile=$(mktemp)
-  echo 'Hello, {{ $name }}' > "$tmpfile"
+  echo 'Hello, {{ $name }}' >"$tmpfile"
   $SIGIL --in-place -f "$tmpfile" name=Jeff
   result=$(cat "$tmpfile")
   rm -f "$tmpfile"
@@ -177,7 +177,7 @@ T_inplace_basic() {
 
 T_inplace_permissions() {
   tmpfile=$(mktemp)
-  echo 'Hello, {{ $name }}' > "$tmpfile"
+  echo 'Hello, {{ $name }}' >"$tmpfile"
   chmod 0755 "$tmpfile"
   $SIGIL --in-place -f "$tmpfile" name=Jeff
   perms=$(stat -c %a "$tmpfile" 2>/dev/null || stat -f %Lp "$tmpfile")
@@ -187,7 +187,7 @@ T_inplace_permissions() {
 
 T_inplace_posix() {
   tmpfile=$(mktemp)
-  echo 'Hello, $name' > "$tmpfile"
+  echo 'Hello, $name' >"$tmpfile"
   $SIGIL --in-place -p -f "$tmpfile" name=Jeff
   result=$(cat "$tmpfile")
   rm -f "$tmpfile"
@@ -206,7 +206,7 @@ T_inplace_rejects_stdin() {
 
 T_inplace_error_preserves_file() {
   tmpfile=$(mktemp)
-  echo 'Hello, {{ $name }' > "$tmpfile"
+  echo 'Hello, {{ $name }' >"$tmpfile"
   original=$(cat "$tmpfile")
   $SIGIL --in-place -f "$tmpfile" name=Jeff 2>/dev/null
   result=$(cat "$tmpfile")
@@ -216,7 +216,7 @@ T_inplace_error_preserves_file() {
 
 T_inplace_long_flag() {
   tmpfile=$(mktemp)
-  echo 'Hello, {{ $name }}' > "$tmpfile"
+  echo 'Hello, {{ $name }}' >"$tmpfile"
   $SIGIL --in-place --filename "$tmpfile" name=World
   result=$(cat "$tmpfile")
   rm -f "$tmpfile"
