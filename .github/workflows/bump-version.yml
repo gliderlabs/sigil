@@ -42,10 +42,20 @@ jobs:
           bump: ${{ github.event.inputs.bump_type }}
           input: ${{ steps.latest-tag.outputs.GIT_LATEST_TAG }}
 
-      - name: Create and Push Tag
+      - name: Update Makefile Version
         run: |
+          CLEAN_VERSION="${GIT_NEXT_TAG#v}"
+          sed -i "s/^BASE_VERSION ?= .*/BASE_VERSION ?= ${CLEAN_VERSION}/" Makefile
           git config --global user.name 'Dokku Bot'
           git config --global user.email no-reply@dokku.com
+          git add Makefile
+          git commit -m "Release ${CLEAN_VERSION}"
+          git push origin HEAD
+        env:
+          GIT_NEXT_TAG: ${{ steps.next-tag.outputs.version }}
+
+      - name: Create and Push Tag
+        run: |
           git tag "$GIT_NEXT_TAG"
           git push origin "$GIT_NEXT_TAG"
         env:
