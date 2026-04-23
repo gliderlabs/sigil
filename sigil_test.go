@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+	"text/template"
 )
 
 func TestLookPath(t *testing.T) {
@@ -280,6 +281,80 @@ func TestConvertYAMLMap(t *testing.T) {
 	}
 	if nested["key"] != "value" {
 		t.Errorf("expected nested.key=value, got %v", nested["key"])
+	}
+}
+
+func registerDefaultFunc() {
+	Register(template.FuncMap{
+		"default": func(value, in interface{}) interface{} {
+			if in == nil {
+				return value
+			}
+			if reflect.Zero(reflect.TypeOf(in)).Interface() == in {
+				return value
+			}
+			return in
+		},
+	})
+}
+
+func TestExecuteDefaultWithMissingVariable(t *testing.T) {
+	registerDefaultFunc()
+	vars := map[string]interface{}{}
+	buf, err := Execute([]byte(`{{ $x | default "foo" }}`), vars, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if buf.String() != "foo" {
+		t.Errorf("expected 'foo', got %q", buf.String())
+	}
+}
+
+func TestExecuteDefaultWithEmptyVariable(t *testing.T) {
+	registerDefaultFunc()
+	vars := map[string]interface{}{"x": ""}
+	buf, err := Execute([]byte(`{{ $x | default "foo" }}`), vars, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if buf.String() != "foo" {
+		t.Errorf("expected 'foo', got %q", buf.String())
+	}
+}
+
+func TestExecuteDefaultWithProvidedVariable(t *testing.T) {
+	registerDefaultFunc()
+	vars := map[string]interface{}{"x": "bar"}
+	buf, err := Execute([]byte(`{{ $x | default "foo" }}`), vars, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if buf.String() != "bar" {
+		t.Errorf("expected 'bar', got %q", buf.String())
+	}
+}
+
+func TestExecuteMultipleMissingVariablesWithDefaults(t *testing.T) {
+	registerDefaultFunc()
+	vars := map[string]interface{}{}
+	buf, err := Execute([]byte(`{{ $a | default "A" }}-{{ $b | default "B" }}`), vars, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if buf.String() != "A-B" {
+		t.Errorf("expected 'A-B', got %q", buf.String())
+	}
+}
+
+func TestExecuteMixedProvidedAndMissingDefaults(t *testing.T) {
+	registerDefaultFunc()
+	vars := map[string]interface{}{"a": "hello"}
+	buf, err := Execute([]byte(`{{ $a | default "A" }}-{{ $b | default "B" }}`), vars, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if buf.String() != "hello-B" {
+		t.Errorf("expected 'hello-B', got %q", buf.String())
 	}
 }
 

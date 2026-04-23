@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -173,10 +174,20 @@ func restoreEnv(env []string) {
 	}
 }
 
+var templateVarRe = regexp.MustCompile(`\$([a-zA-Z_][a-zA-Z0-9_]*)`)
+
 func Execute(input []byte, vars map[string]interface{}, name string) (bytes.Buffer, error) {
 	var tmplVars string
 	var err error
 	defer restoreEnv(os.Environ())
+	// Scan template for $variable references and declare missing ones as nil.
+	// This allows patterns like {{ $x | default "foo" }} to work when x is not provided.
+	for _, match := range templateVarRe.FindAllSubmatch(input, -1) {
+		varName := string(match[1])
+		if _, exists := vars[varName]; !exists {
+			vars[varName] = nil
+		}
+	}
 	for k, iv := range vars {
 		if v, ok := iv.(string); ok {
 			err := os.Setenv(k, v)
