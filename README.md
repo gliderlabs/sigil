@@ -71,6 +71,22 @@ delimiter strings, separated by a coma.
 SIGIL_DELIMS={{{,}}}  sigil -i 'hello {{{ $name }}}' name=packer
 ```
 
+### In-place editing
+
+Use the `--in-place` flag with `-f` to write the rendered output back to the
+template file, similar to `sed -i`:
+
+```shell
+sigil --in-place -f config.tmpl var1=foo var2=bar
+```
+
+This safely replaces the file using an atomic write (temp file + rename), so the
+original file is preserved if template processing fails. File permissions are
+retained.
+
+Note: `--in-place` requires the `-f` flag. It cannot be used with `-i` (inline)
+or stdin input.
+
 ### Functions
 
 There are a number of builtin functions that can be used as modifiers,
