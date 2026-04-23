@@ -229,3 +229,125 @@ EOF
   rm -f "$tmpfile"
   [[ "$result" == "Hello, World" ]]
 }
+
+@test "vars-file with JSON file" {
+  tmpfile=$(mktemp)
+  mv "$tmpfile" "${tmpfile}.json"
+  tmpfile="${tmpfile}.json"
+  echo '{"name": "Jeff"}' >"$tmpfile"
+  result=$(echo 'Hello, {{ $name }}' | $SIGIL -V "$tmpfile")
+  rm -f "$tmpfile"
+  [[ "$result" == "Hello, Jeff" ]]
+}
+
+@test "vars-file with YAML file" {
+  tmpfile=$(mktemp)
+  mv "$tmpfile" "${tmpfile}.yaml"
+  tmpfile="${tmpfile}.yaml"
+  echo 'name: Jeff' >"$tmpfile"
+  result=$(echo 'Hello, {{ $name }}' | $SIGIL -V "$tmpfile")
+  rm -f "$tmpfile"
+  [[ "$result" == "Hello, Jeff" ]]
+}
+
+@test "vars-file with .yml extension" {
+  tmpfile=$(mktemp)
+  mv "$tmpfile" "${tmpfile}.yml"
+  tmpfile="${tmpfile}.yml"
+  echo 'name: Jeff' >"$tmpfile"
+  result=$(echo 'Hello, {{ $name }}' | $SIGIL --vars-file "$tmpfile")
+  rm -f "$tmpfile"
+  [[ "$result" == "Hello, Jeff" ]]
+}
+
+@test "vars-file with env file" {
+  tmpfile=$(mktemp)
+  mv "$tmpfile" "${tmpfile}.env"
+  tmpfile="${tmpfile}.env"
+  printf '# a comment\nname=Jeff\n' >"$tmpfile"
+  result=$(echo 'Hello, {{ $name }}' | $SIGIL -V "$tmpfile")
+  rm -f "$tmpfile"
+  [[ "$result" == "Hello, Jeff" ]]
+}
+
+@test "vars-file with env file and quoted values" {
+  tmpfile=$(mktemp)
+  mv "$tmpfile" "${tmpfile}.env"
+  tmpfile="${tmpfile}.env"
+  printf 'name="Jeff Doe"\n' >"$tmpfile"
+  result=$(echo 'Hello, {{ $name }}' | $SIGIL -V "$tmpfile")
+  rm -f "$tmpfile"
+  [[ "$result" == "Hello, Jeff Doe" ]]
+}
+
+@test "vars-file with env file and export prefix" {
+  tmpfile=$(mktemp)
+  mv "$tmpfile" "${tmpfile}.env"
+  tmpfile="${tmpfile}.env"
+  printf 'export name=Jeff\n' >"$tmpfile"
+  result=$(echo 'Hello, {{ $name }}' | $SIGIL -V "$tmpfile")
+  rm -f "$tmpfile"
+  [[ "$result" == "Hello, Jeff" ]]
+}
+
+@test "vars-file CLI args override file vars" {
+  tmpfile=$(mktemp)
+  mv "$tmpfile" "${tmpfile}.json"
+  tmpfile="${tmpfile}.json"
+  echo '{"name": "FileJeff"}' >"$tmpfile"
+  result=$(echo 'Hello, {{ $name }}' | $SIGIL -V "$tmpfile" name=CLIJeff)
+  rm -f "$tmpfile"
+  [[ "$result" == "Hello, CLIJeff" ]]
+}
+
+@test "vars-file multiple files merge in order" {
+  tmpfile1=$(mktemp)
+  mv "$tmpfile1" "${tmpfile1}.json"
+  tmpfile1="${tmpfile1}.json"
+  tmpfile2=$(mktemp)
+  mv "$tmpfile2" "${tmpfile2}.json"
+  tmpfile2="${tmpfile2}.json"
+  echo '{"name": "First", "color": "red"}' >"$tmpfile1"
+  echo '{"name": "Second"}' >"$tmpfile2"
+  result=$(echo '{{ $name }},{{ $color }}' | $SIGIL -V "$tmpfile1" -V "$tmpfile2")
+  rm -f "$tmpfile1" "$tmpfile2"
+  [[ "$result" == "Second,red" ]]
+}
+
+@test "vars-file with POSIX mode" {
+  tmpfile=$(mktemp)
+  mv "$tmpfile" "${tmpfile}.json"
+  tmpfile="${tmpfile}.json"
+  echo '{"name": "Jeff"}' >"$tmpfile"
+  result=$(echo 'Hello, $name' | $SIGIL -p -V "$tmpfile")
+  rm -f "$tmpfile"
+  [[ "$result" == "Hello, Jeff" ]]
+}
+
+@test "vars-file nonexistent file fails" {
+  run $SIGIL -i 'Hello' -V /nonexistent/vars.json
+  [[ "$status" -ne 0 ]]
+}
+
+@test "vars-file invalid JSON fails" {
+  tmpfile=$(mktemp)
+  mv "$tmpfile" "${tmpfile}.json"
+  tmpfile="${tmpfile}.json"
+  echo 'not json' >"$tmpfile"
+  run $SIGIL -i 'Hello' -V "$tmpfile"
+  rm -f "$tmpfile"
+  [[ "$status" -ne 0 ]]
+}
+
+@test "vars-file with in-place mode" {
+  varsfile=$(mktemp)
+  mv "$varsfile" "${varsfile}.json"
+  varsfile="${varsfile}.json"
+  tmplfile=$(mktemp)
+  echo '{"name": "Jeff"}' >"$varsfile"
+  echo 'Hello, {{ $name }}' >"$tmplfile"
+  $SIGIL --in-place -f "$tmplfile" -V "$varsfile"
+  result=$(cat "$tmplfile")
+  rm -f "$varsfile" "$tmplfile"
+  [[ "$result" == "Hello, Jeff" ]]
+}

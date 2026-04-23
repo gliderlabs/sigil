@@ -15,11 +15,12 @@ import (
 var Version string
 
 var (
-	filename = flag.StringP("filename", "f", "", "use template file instead of STDIN")
-	inline   = flag.StringP("inline", "i", "", "use inline template string instead of STDIN")
-	inPlace  = flag.Bool("in-place", false, "write output back to the file specified by -f")
-	posix    = flag.BoolP("posix", "p", false, "preprocess with POSIX variable expansion")
-	version  = flag.BoolP("version", "v", false, "prints version")
+	filename  = flag.StringP("filename", "f", "", "use template file instead of STDIN")
+	inline    = flag.StringP("inline", "i", "", "use inline template string instead of STDIN")
+	inPlace   = flag.Bool("in-place", false, "write output back to the file specified by -f")
+	varsFiles = flag.StringArrayP("vars-file", "V", []string{}, "load variables from a file (JSON, YAML, or env format)")
+	posix     = flag.BoolP("posix", "p", false, "preprocess with POSIX variable expansion")
+	version   = flag.BoolP("version", "v", false, "prints version")
 )
 
 func template() ([]byte, string, error) {
@@ -101,6 +102,16 @@ func main() {
 	}
 
 	vars := make(map[string]interface{})
+	for _, vf := range *varsFiles {
+		fileVars, err := sigil.ParseVarsFile(vf)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		for k, v := range fileVars {
+			vars[k] = v
+		}
+	}
 	for _, arg := range flag.Args() {
 		parts := strings.SplitN(arg, "=", 2)
 		if len(parts) == 2 {
