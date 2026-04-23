@@ -1,138 +1,145 @@
-# shellcheck disable=all
-GOOS=$(go env GOOS)
-export SIGIL="${SIGIL:-build/${GOOS}/gliderlabs-sigil}-amd64"
+setup() {
+  GOOS=$(go env GOOS)
+  GOARCH=$(go env GOARCH)
+  if [[ "$GOOS" == "darwin" ]]; then
+    export SIGIL="${SIGIL:-build/${GOOS}/gliderlabs-sigil}"
+  else
+    export SIGIL="${SIGIL:-build/${GOOS}/gliderlabs-sigil-${GOARCH}}"
+  fi
+}
 
-T_posix_var() {
+@test "POSIX variable substitution" {
   result=$(echo 'Hello, $name' | $SIGIL -p name=Jeff)
   [[ "$result" == "Hello, Jeff" ]]
 }
 
-T_posix_var_default() {
+@test "POSIX variable with default value" {
   result=$(echo 'Hello, ${name:-Jeff}' | $SIGIL -p)
   [[ "$result" == "Hello, Jeff" ]]
 }
 
-T_posix_var_check() {
+@test "POSIX variable check with value set" {
   result=$(echo 'Hello, ${name:?}' | $SIGIL -p name=Jeff)
   [[ "$result" == "Hello, Jeff" ]]
 }
 
-T_posix_var_check_unset() {
-  echo 'Hello, ${name:?}' | $SIGIL -p &>/dev/null
-  [[ $? -ne 0 ]]
+@test "POSIX variable check fails when unset" {
+  run bash -c "echo 'Hello, \${name:?}' | $SIGIL -p"
+  [[ "$status" -ne 0 ]]
 }
 
-T_template_var() {
+@test "template variable substitution" {
   result=$(echo 'Hello, {{ $name }}' | $SIGIL name=Jeff)
   [[ "$result" == "Hello, Jeff" ]]
 }
 
-T_range_stdin() {
+@test "range with stdin" {
   result=$(echo '${name} is{{ range seq ${count:-3} }} cool{{ end }}!' | $SIGIL -p name=Sigil)
   [[ "$result" == "Sigil is cool cool cool!" ]]
 }
 
-T_range_var_stdin() {
+@test "range variable with stdin" {
   result=$(echo 'Sigil is{{ range $i := seq 3 }} cool{{ end }}!' | $SIGIL)
   [[ "$result" == "Sigil is cool cool cool!" ]]
 }
 
-T_range_var_inline_with_equals() {
+@test "range variable inline with equals" {
   result=$($SIGIL -i='Sigil is{{ range $i := seq 3 }} cool{{ end }}!')
   [[ "$result" == "Sigil is cool cool cool!" ]]
 }
 
-T_range_var_inline_without_equals() {
+@test "range variable inline without equals" {
   result=$($SIGIL -i 'Sigil is{{ range $i := seq 3 }} cool{{ end }}!')
   [[ "$result" == "Sigil is cool cool cool!" ]]
 }
 
-T_capitalize() {
+@test "capitalize function" {
   result=$(echo 'hello {{capitalize "jeff"}}' | $SIGIL)
   [[ "$result" == "hello Jeff" ]]
 }
 
-T_exists_exist_relative() {
+@test "exists returns true for relative path" {
   result=$(echo '{{exists "Makefile"}}' | $SIGIL)
   [[ "$result" == "true" ]]
 }
 
-T_exists_exist_full() {
+@test "exists returns true for full path" {
   result=$(echo "{{exists \"$(pwd)/Makefile\"}}" | $SIGIL)
   [[ "$result" == "true" ]]
 }
 
-T_exists_notexist_relative() {
+@test "exists returns false for missing relative path" {
   result=$(echo '{{exists "FileNotExist"}}' | $SIGIL)
   [[ "$result" == "false" ]]
 }
 
-T_exists_notexist_full() {
+@test "exists returns false for missing full path" {
   result=$(echo "{{exists \"$(pwd)/FileNotExist\"}}" | $SIGIL)
   [[ "$result" == "false" ]]
 }
 
-T_XXX() {
+@test "literal text passthrough" {
   result=$(echo 'XXX' | $SIGIL)
   [[ "$result" == "XXX" ]]
 }
 
-T_split_join() {
+@test "split and join pipeline" {
   result=$(echo 'one,two,three' | $SIGIL -i '{{ stdin | split "," | join ":" }}')
   [[ "$result" == "one:two:three" ]]
 }
 
-T_splitkv_joinkv() {
+@test "splitkv and joinkv pipeline" {
   result=$(echo -n 'one:two,three:four' | $SIGIL -i '{{ stdin | split "," | splitkv ":" | joinkv "=" | join "," }}')
   [[ "$result" == "one=two,three=four" || "$result" == "three=four,one=two" ]]
 }
 
-T_json() {
+@test "JSON parse and serialize" {
   result=$(echo '{"one": "two"}' | $SIGIL -i '{{ stdin | json | tojson }}')
   [[ "$result" == "{\"one\":\"two\"}" ]]
 }
 
-T_json_deep() {
+@test "JSON deep nested parse and serialize" {
   result=$(echo '{"foo": {"one": "two"}}' | $SIGIL -i '{{ stdin | json | tojson }}')
   [[ "$result" == '{"foo":{"one":"two"}}' ]]
 }
 
-T_yaml() {
+@test "YAML parse and serialize" {
   yaml="$(echo -e "one: two\nthree:\n- four\n- five")"
   result="$(echo -e "$yaml" | $SIGIL -i '{{ stdin | yaml | toyaml }}')"
   [[ "$result" == "$yaml" ]]
 }
 
-T_shell() {
+@test "shell command execution" {
   result="$($SIGIL -i '{{ sh "date +%m-%d-%Y" }}')"
   [[ "$result" == "$(date +%m-%d-%Y)" ]]
 }
 
-T_httpget() {
+@test "HTTP GET request" {
   result="$($SIGIL -i '{{ httpget "https://httpbin.org/get" | json | pointer "/url" }}')"
   [[ "$result" == "https://httpbin.org/get" ]]
 }
 
-T_custom_delim() {
+@test "custom delimiters" {
   result="$(SIGIL_DELIMS={{{,}}} $SIGIL -i '{{ hello {{{ $name }}} }}' name=packer)"
   [[ "$result" == "{{ hello packer }}" ]]
 }
 
-T_substr() {
+@test "substring with range" {
   result="$($SIGIL -i '{{ "abcdefgh" | substr "1:4" }}')"
   [[ "$result" == "bcd" ]]
 }
-T_substr_single_index() {
+
+@test "substring with single index" {
   result="$($SIGIL -i '{{ "abcdefgh" | substr ":4" }}')"
   [[ "$result" == "abcd" ]]
 }
 
-T_yamltojson() {
+@test "YAML to JSON conversion" {
   result="$(printf 'joe:\n  age: 32\n  color: red' | $SIGIL -i '{{ stdin |  yaml | tojson }}')"
   [[ "$result" == '{"joe":{"age":32,"color":"red"}}' ]]
 }
 
-T_yamltojsondeep() {
+@test "YAML to JSON deep conversion" {
   result="$(
     $SIGIL -i '{{ stdin |  yaml | tojson }}' <<EOF
 a: Easy!
@@ -151,22 +158,22 @@ EOF
   [[ "$result" == '{"a":"Easy!","b":{"c":2,"d":[3,4]},"c":{"list":["one","two","tree"]}}' ]]
 }
 
-T_jmespath() {
+@test "JMESPath query" {
   result="$(echo '[{"name":"bob","age":20},{"name":"jim","age":30},{"name":"joe","age":40}]' | $SIGIL -i '{{stdin | json | jmespath "[? age >= `30`].name | reverse(@)"  | join ","}}')"
   [[ "$result" == 'joe,jim' ]]
 }
 
-T_base64enc() {
+@test "base64 encode" {
   result="$(echo 'happybirthday' | $SIGIL -i '{{ stdin | base64enc }}')"
   [[ "$result" == "aGFwcHliaXJ0aGRheQo=" ]]
 }
 
-T_base64dec() {
+@test "base64 decode" {
   result="$(echo 'aGFwcHliaXJ0aGRheQo=' | $SIGIL -i '{{ stdin | base64dec }}')"
   [[ "$result" == "happybirthday" ]]
 }
 
-T_inplace_basic() {
+@test "in-place basic substitution" {
   tmpfile=$(mktemp)
   echo 'Hello, {{ $name }}' >"$tmpfile"
   $SIGIL --in-place -f "$tmpfile" name=Jeff
@@ -175,7 +182,7 @@ T_inplace_basic() {
   [[ "$result" == "Hello, Jeff" ]]
 }
 
-T_inplace_permissions() {
+@test "in-place preserves file permissions" {
   tmpfile=$(mktemp)
   echo 'Hello, {{ $name }}' >"$tmpfile"
   chmod 0755 "$tmpfile"
@@ -185,7 +192,7 @@ T_inplace_permissions() {
   [[ "$perms" == "755" ]]
 }
 
-T_inplace_posix() {
+@test "in-place POSIX mode" {
   tmpfile=$(mktemp)
   echo 'Hello, $name' >"$tmpfile"
   $SIGIL --in-place -p -f "$tmpfile" name=Jeff
@@ -194,27 +201,27 @@ T_inplace_posix() {
   [[ "$result" == "Hello, Jeff" ]]
 }
 
-T_inplace_requires_filename() {
-  $SIGIL --in-place -i 'Hello' 2>/dev/null
-  [[ $? -ne 0 ]]
+@test "in-place requires filename" {
+  run $SIGIL --in-place -i 'Hello'
+  [[ "$status" -ne 0 ]]
 }
 
-T_inplace_rejects_stdin() {
-  echo 'Hello' | $SIGIL --in-place 2>/dev/null
-  [[ $? -ne 0 ]]
+@test "in-place rejects stdin" {
+  run bash -c "echo 'Hello' | $SIGIL --in-place"
+  [[ "$status" -ne 0 ]]
 }
 
-T_inplace_error_preserves_file() {
+@test "in-place error preserves original file" {
   tmpfile=$(mktemp)
   echo 'Hello, {{ $name }' >"$tmpfile"
   original=$(cat "$tmpfile")
-  $SIGIL --in-place -f "$tmpfile" name=Jeff 2>/dev/null
+  run $SIGIL --in-place -f "$tmpfile" name=Jeff
   result=$(cat "$tmpfile")
   rm -f "$tmpfile"
   [[ "$result" == "$original" ]]
 }
 
-T_inplace_long_flag() {
+@test "in-place with long filename flag" {
   tmpfile=$(mktemp)
   echo 'Hello, {{ $name }}' >"$tmpfile"
   $SIGIL --in-place --filename "$tmpfile" name=World
