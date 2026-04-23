@@ -176,8 +176,7 @@ validate:
 	cd validation && ar -x ../build/deb/$(NAME)_$(VERSION)_arm64.deb
 	sha1sum build/deb/$(NAME)_$(VERSION)_amd64.deb
 	sha1sum build/deb/$(NAME)_$(VERSION)_arm64.deb
-	go install github.com/progrium/basht/...@latest
-	basht tests/*.bash
+	bats tests/*.bats
 
 prebuild:
 	git config --global --add safe.directory $(shell pwd)
