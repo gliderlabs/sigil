@@ -256,16 +256,10 @@ func TestParseEnvContentExportWithoutSpace(t *testing.T) {
 	}
 }
 
-func TestParseEnvContentSkipsNoEquals(t *testing.T) {
-	vars, err := parseEnvContent([]byte("noequals\nname=Jeff\n"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(vars) != 1 {
-		t.Errorf("expected 1 var, got %d", len(vars))
-	}
-	if vars["name"] != "Jeff" {
-		t.Errorf("expected name=Jeff, got %v", vars["name"])
+func TestParseEnvContentRejectsNoEquals(t *testing.T) {
+	_, err := parseEnvContent([]byte("noequals\nname=Jeff\n"))
+	if err == nil {
+		t.Error("expected error for line without =")
 	}
 }
 

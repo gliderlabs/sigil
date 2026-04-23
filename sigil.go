@@ -10,6 +10,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/joho/godotenv"
 	"github.com/mgood/go-posix"
 	"gopkg.in/yaml.v2"
 )
@@ -117,27 +118,13 @@ func convertYAMLMap(m map[interface{}]interface{}) map[string]interface{} {
 }
 
 func parseEnvContent(data []byte) (map[string]interface{}, error) {
-	vars := make(map[string]interface{})
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		line = strings.TrimPrefix(line, "export ")
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-		key := strings.TrimSpace(parts[0])
-		value := strings.TrimSpace(parts[1])
-		if len(value) >= 2 {
-			if (value[0] == '"' && value[len(value)-1] == '"') ||
-				(value[0] == '\'' && value[len(value)-1] == '\'') {
-				value = value[1 : len(value)-1]
-			}
-		}
-		vars[key] = value
+	parsed, err := godotenv.Parse(bytes.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+	vars := make(map[string]interface{}, len(parsed))
+	for k, v := range parsed {
+		vars[k] = v
 	}
 	return vars, nil
 }

@@ -11,4 +11,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad // indirect
+require (
+	github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
+)
